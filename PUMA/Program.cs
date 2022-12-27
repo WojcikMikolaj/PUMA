@@ -152,24 +152,36 @@ public class Program : GameWindow
             {
                 _puma.Alpha1 = alpha1;
             }
-            //TODO
+            
             float q2 = _puma.Q2;
             if(ImGui.SliderFloat("q2", ref q2, 1, 5))
             {
                 _puma.Q2 = q2;
             }
-            //TODO
-            float alpha2 = 0;
-            ImGui.SliderFloat("alpha2", ref alpha2, 0, 360);
-            //TODO
-            float alpha3 = 0;
-            ImGui.SliderFloat("alpha3", ref alpha3, 0, 360);
-            //TODO
-            float alpha4 = 0;
-            ImGui.SliderFloat("alpha4", ref alpha4, 0, 360);
-            //TODO
-            float alpha5 = 0;
-            ImGui.SliderFloat("alpha5", ref alpha5, 0, 360);
+            
+            float alpha2 = _puma.Alpha2;
+            if (ImGui.SliderFloat("alpha2", ref alpha2, 0, 360))
+            {
+                _puma.Alpha2 = alpha2;
+            }
+            
+            float alpha3 = _puma.Alpha3;
+            if (ImGui.SliderFloat("alpha3", ref alpha3, 0, 360))
+            {
+                _puma.Alpha3 = alpha3;
+            }
+            
+            float alpha4 = _puma.Alpha4;
+            if (ImGui.SliderFloat("alpha4", ref alpha4, 0, 360))
+            {
+                _puma.Alpha4 = alpha4;
+            }
+            
+            float alpha5 = _puma.Alpha5;
+            if (ImGui.SliderFloat("alpha5", ref alpha5, 0, 360))
+            {
+                _puma.Alpha5 = alpha5;
+            }
         }
 
         if (ImGui.CollapsingHeader("Ustawienia"))

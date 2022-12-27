@@ -6,13 +6,15 @@ namespace TemplateProject;
 
 public class Cylinder
 {
-    public Cylinder(float h = 2, int sectionsCount = 10)
+    public Cylinder(Direction direction, float h = 2, int sectionsCount = 10)
     {
+        this._direction = direction;
         this._h = h;
         this._sectionsCount = sectionsCount;
         ConstructCylinder();
     }
 
+    private readonly Direction _direction;
     private Mesh _mesh;
 
 
@@ -62,12 +64,45 @@ public class Cylinder
             var u = (float) i / _sectionsCount;
             var alpha = u * MH.TwoPi;
 
+            Vector3 posP;
+            Vector3 posS;
+
+            switch (_direction)
+            {
+                case Direction.X:
+                    posP = new Vector3(0,_r * (float) MH.Cos(alpha), _r * (float) MH.Sin(alpha));
+                    posS = new Vector3(_h,_r * (float) MH.Cos(alpha), _r * (float) MH.Sin(alpha));
+                    break;
+                case Direction.Y:
+                    posP = new Vector3(_r * (float) MH.Cos(alpha), 0,_r * (float) MH.Sin(alpha));
+                    posS = new Vector3(_r * (float) MH.Cos(alpha), _h,_r * (float) MH.Sin(alpha));
+                    break;
+                case Direction.Z:
+                    posP = new Vector3(_r * (float) MH.Cos(alpha), _r * (float) MH.Sin(alpha), 0);
+                    posS = new Vector3(_r * (float) MH.Cos(alpha), _r * (float) MH.Sin(alpha), _h);
+                    break;
+                case Direction.NX:
+                    posP = new Vector3(0,_r * (float) MH.Cos(alpha), _r * (float) MH.Sin(alpha));
+                    posS = new Vector3(-_h,_r * (float) MH.Cos(alpha), _r * (float) MH.Sin(alpha));
+                    break;
+                case Direction.NY:
+                    posP = new Vector3(_r * (float) MH.Cos(alpha), 0,_r * (float) MH.Sin(alpha));
+                    posS = new Vector3(_r * (float) MH.Cos(alpha), -_h,_r * (float) MH.Sin(alpha));
+                    break;
+                case Direction.NZ:
+                    posP = new Vector3(_r * (float) MH.Cos(alpha), _r * (float) MH.Sin(alpha), 0);
+                    posS = new Vector3(_r * (float) MH.Cos(alpha), _r * (float) MH.Sin(alpha), -_h);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+            
             podstawa.Add((
-                new Vector3(_r * (float) MH.Cos(alpha), _r * (float) MH.Sin(alpha), 0),
+                posP,
                 new Vector2(u, 0)
             ));
             sufit.Add((
-                new Vector3(_r * (float) MH.Cos(alpha), _r * (float) MH.Sin(alpha), _h),
+                posS,
                 new Vector2(u, 1)
             ));
         }
@@ -119,9 +154,42 @@ public class Cylinder
         vertices.Add(0);
 
         //górny środek
-        vertices.Add(0);
-        vertices.Add(0);
-        vertices.Add(_h);
+        switch (_direction)
+        {
+            case Direction.X:
+                vertices.Add(_h);
+                vertices.Add(0);
+                vertices.Add(0);
+                break;
+            case Direction.Y:
+                vertices.Add(0);
+                vertices.Add(_h);
+                vertices.Add(0);
+                break;
+            case Direction.Z:
+                vertices.Add(0);
+                vertices.Add(0);
+                vertices.Add(_h);
+                break;
+            case Direction.NX:
+                vertices.Add(-_h);
+                vertices.Add(0);
+                vertices.Add(0);
+                break;
+            case Direction.NY:
+                vertices.Add(0);
+                vertices.Add(-_h);
+                vertices.Add(0);
+                break;
+            case Direction.NZ:
+                vertices.Add(0);
+                vertices.Add(0);
+                vertices.Add(-_h);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+        
 
         List<float> texCoords = new List<float>();
         foreach (var texCoordsVector2 in texCoordsVector2s)
