@@ -1,4 +1,5 @@
-﻿using ImGuiNET;
+﻿using System.Numerics;
+using ImGuiNET;
 using OpenTK.Graphics.OpenGL4;
 using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
@@ -6,6 +7,7 @@ using OpenTK.Windowing.Desktop;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using TemplateProject.ImGuiUtils;
 using ShaderType = OpenTK.Graphics.OpenGL4.ShaderType;
+using Vector3 = OpenTK.Mathematics.Vector3;
 
 namespace TemplateProject;
 
@@ -21,6 +23,10 @@ public class Program : GameWindow
 
     private PUMA _puma;
 
+    private Vector3 startingPosition = new Vector3();
+    private Vector3 endingPosition = new Vector3();
+    private Vector3 startingRotation = new Vector3();
+    private Vector3 endingRotation = new Vector3();
     public static void Main(string[] args)
     {
         using var program = new Program(GameWindowSettings.Default, NativeWindowSettings.Default);
@@ -144,7 +150,40 @@ public class Program : GameWindow
         //ImGui.ShowDemoWindow();
 
         ImGui.Begin("PUMA");
-
+        if (ImGui.CollapsingHeader("Animacja"))
+        {
+            ImGui.Text("Pozycja startowa");
+            System.Numerics.Vector3 sPos = startingPosition.ToNumerics();
+            if (ImGui.InputFloat3("sPos", ref sPos))
+            {
+                startingPosition = sPos.ToOpenTK();
+            }
+            ImGui.Text("Rotacja startowa");
+            System.Numerics.Vector3 sRot = startingRotation.ToNumerics();
+            if (ImGui.InputFloat3("sRot", ref sRot))
+            {
+                startingRotation = sRot.ToOpenTK();
+            }
+            
+            ImGui.Spacing();
+            ImGui.Spacing();
+            ImGui.Spacing();
+            ImGui.Spacing();
+            ImGui.Spacing();
+            
+            ImGui.Text("Pozycja koncowa");
+            System.Numerics.Vector3 ePos = endingPosition.ToNumerics();
+            if(ImGui.InputFloat3("ePos", ref ePos))
+            {
+                endingPosition = ePos.ToOpenTK();
+            }
+            ImGui.Text("Rotacja koncowa");
+            System.Numerics.Vector3 eRot = endingRotation.ToNumerics();
+            if (ImGui.InputFloat3("eRot", ref eRot))
+            {
+                endingRotation = eRot.ToOpenTK();
+            }
+        }
         if (ImGui.CollapsingHeader("Parametry"))
         {
             float alpha1 = _puma.Alpha1;
