@@ -114,7 +114,7 @@ public class FirstPersonControl : Camera.IControl
         if (mouse.IsButtonDown(MouseButton.Button1) && mouse.WasButtonDown(MouseButton.Button1))
         {
             Vector2 delta = mouse.Delta;
-            camera.Rotate(-Sensitivity * delta.Y, Sensitivity * delta.X);
+            camera.Rotate(Sensitivity * delta.Y, Sensitivity * delta.X);
         }
 
         if (keyboard.IsKeyDown(Keys.W))
@@ -139,12 +139,22 @@ public class FirstPersonControl : Camera.IControl
 
         if (keyboard.IsKeyDown(Keys.E))
         {
-            camera.Move(0, dt * Speed, 0);
+            camera.Move( dt * Speed, 0,0);
         }
 
         if (keyboard.IsKeyDown(Keys.Q))
         {
-            camera.Move(0, -dt * Speed, 0);
+            camera.Move( -dt * Speed, 0,0);
+        }
+        
+        if (keyboard.IsKeyDown(Keys.LeftShift) || keyboard.IsKeyDown(Keys.R))
+        {
+            camera.Move( 0,dt * Speed, 0);
+        }
+
+        if (keyboard.IsKeyDown(Keys.LeftControl) || keyboard.IsKeyDown(Keys.F))
+        {
+            camera.Move( 0,-dt * Speed, 0);
         }
     }
 }

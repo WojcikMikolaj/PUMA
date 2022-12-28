@@ -14,8 +14,9 @@ namespace TemplateProject;
 public class Program : GameWindow
 {
     public bool IsLoaded { get; private set; }
-    
-    private Shader shader;
+
+    private Shader defaultShader;
+    private Shader pointerShader;
     private ImGuiController controller;
     private Mesh rectangle;
     private Camera camera;
@@ -23,10 +24,9 @@ public class Program : GameWindow
 
     private PUMA _puma;
 
-    private Vector3 startingPosition = new Vector3();
-    private Vector3 endingPosition = new Vector3();
-    private Vector3 startingRotation = new Vector3();
-    private Vector3 endingRotation = new Vector3();
+    private Pointer _startingPointer;
+    private Pointer _endingPointer;
+
     public static void Main(string[] args)
     {
         using var program = new Program(GameWindowSettings.Default, NativeWindowSettings.Default);
@@ -35,22 +35,29 @@ public class Program : GameWindow
         program.Run();
     }
 
-    public Program(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(gameWindowSettings, nativeWindowSettings) { }
+    public Program(GameWindowSettings gameWindowSettings, NativeWindowSettings nativeWindowSettings) : base(
+        gameWindowSettings, nativeWindowSettings)
+    {
+    }
 
     protected override void OnLoad()
     {
         base.OnLoad();
 
-        shader = new Shader(("shader.vert", ShaderType.VertexShader), ("shader.frag", ShaderType.FragmentShader));
+        defaultShader = new Shader(("shader.vert", ShaderType.VertexShader),
+            ("shader.frag", ShaderType.FragmentShader));
+        pointerShader = new Shader(("PointerShader.vert", ShaderType.VertexShader),
+            ("PointerShader.frag", ShaderType.FragmentShader));
         controller = new ImGuiController(ClientSize.X, ClientSize.Y);
 
         camera = new Camera(new FirstPersonControl(), new PerspectiveView());
 
-        float[] vertices = {
-            0.5f,  0.5f, 2.0f,
+        float[] vertices =
+        {
+            0.5f, 0.5f, 2.0f,
             0.5f, -0.5f, 2.0f,
             -0.5f, -0.5f, 2.0f,
-            -0.5f,  0.5f, 2.0f
+            -0.5f, 0.5f, 2.0f
         };
         float[] texCoords =
         {
@@ -81,6 +88,8 @@ public class Program : GameWindow
     private void InitializeScene()
     {
         _puma = new PUMA();
+        _startingPointer = new Pointer();
+        _endingPointer = new Pointer();
     }
 
     protected override void OnUnload()
@@ -90,7 +99,7 @@ public class Program : GameWindow
         rectangle.Dispose();
         controller.Dispose();
         texture.Dispose();
-        shader.Dispose();
+        defaultShader.Dispose();
 
         IsLoaded = false;
     }
@@ -134,12 +143,18 @@ public class Program : GameWindow
 
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-        shader.Use();
+        defaultShader.Use();
         texture.Use();
-        shader.LoadInteger("sampler", 0);
-        shader.LoadMatrix4("mvp", camera.GetProjectionViewMatrix());
+        defaultShader.LoadInteger("sampler", 0);
+        defaultShader.LoadMatrix4("mvp", camera.GetProjectionViewMatrix());
         //rectangle.Render();
-        _puma.Render(shader, camera.GetProjectionViewMatrix());
+        _puma.Render(defaultShader, camera.GetProjectionViewMatrix());
+
+
+        pointerShader.Use();
+        _startingPointer.Render(pointerShader, camera.GetProjectionViewMatrix());
+        _endingPointer.Render(pointerShader, camera.GetProjectionViewMatrix());
+
         RenderGui();
 
         Context.SwapBuffers();
@@ -153,37 +168,40 @@ public class Program : GameWindow
         if (ImGui.CollapsingHeader("Animacja"))
         {
             ImGui.Text("Pozycja startowa");
-            System.Numerics.Vector3 sPos = startingPosition.ToNumerics();
+            System.Numerics.Vector3 sPos = _startingPointer.Pos.ToNumerics();
             if (ImGui.InputFloat3("sPos", ref sPos))
             {
-                startingPosition = sPos.ToOpenTK();
+                _startingPointer.Pos = sPos.ToOpenTK();
             }
+
             ImGui.Text("Rotacja startowa");
-            System.Numerics.Vector3 sRot = startingRotation.ToNumerics();
-            if (ImGui.InputFloat3("sRot", ref sRot))
+            System.Numerics.Vector3 sRot = _startingPointer.Rot.ToNumerics();
+            if (ImGui.SliderFloat3("sRot", ref sRot, 0, 360))
             {
-                startingRotation = sRot.ToOpenTK();
+                _startingPointer.Rot = sRot.ToOpenTK();
             }
-            
+
             ImGui.Spacing();
             ImGui.Spacing();
             ImGui.Spacing();
             ImGui.Spacing();
             ImGui.Spacing();
-            
+
             ImGui.Text("Pozycja koncowa");
-            System.Numerics.Vector3 ePos = endingPosition.ToNumerics();
-            if(ImGui.InputFloat3("ePos", ref ePos))
+            System.Numerics.Vector3 ePos = _endingPointer.Pos.ToNumerics();
+            if (ImGui.InputFloat3("ePos", ref ePos))
             {
-                endingPosition = ePos.ToOpenTK();
+                _endingPointer.Pos = ePos.ToOpenTK();
             }
+
             ImGui.Text("Rotacja koncowa");
-            System.Numerics.Vector3 eRot = endingRotation.ToNumerics();
-            if (ImGui.InputFloat3("eRot", ref eRot))
+            System.Numerics.Vector3 eRot = _endingPointer.Rot.ToNumerics();
+            if (ImGui.SliderFloat3("eRot", ref eRot, 0, 360))
             {
-                endingRotation = eRot.ToOpenTK();
+                _endingPointer.Rot = eRot.ToOpenTK();
             }
         }
+
         if (ImGui.CollapsingHeader("Parametry"))
         {
             float alpha1 = _puma.Alpha1;
@@ -191,31 +209,31 @@ public class Program : GameWindow
             {
                 _puma.Alpha1 = alpha1;
             }
-            
+
             float q2 = _puma.Q2;
-            if(ImGui.SliderFloat("q2", ref q2, 1, 5))
+            if (ImGui.SliderFloat("q2", ref q2, 1, 5))
             {
                 _puma.Q2 = q2;
             }
-            
+
             float alpha2 = _puma.Alpha2;
             if (ImGui.SliderFloat("alpha2", ref alpha2, 0, 360))
             {
                 _puma.Alpha2 = alpha2;
             }
-            
+
             float alpha3 = _puma.Alpha3;
             if (ImGui.SliderFloat("alpha3", ref alpha3, 0, 360))
             {
                 _puma.Alpha3 = alpha3;
             }
-            
+
             float alpha4 = _puma.Alpha4;
             if (ImGui.SliderFloat("alpha4", ref alpha4, 0, 360))
             {
                 _puma.Alpha4 = alpha4;
             }
-            
+
             float alpha5 = _puma.Alpha5;
             if (ImGui.SliderFloat("alpha5", ref alpha5, 0, 360))
             {
@@ -233,11 +251,13 @@ public class Program : GameWindow
             {
                 _puma.L1 = l1;
             }
-            if(ImGui.SliderFloat("l3", ref l3, 1, 5))
+
+            if (ImGui.SliderFloat("l3", ref l3, 1, 5))
             {
                 _puma.L3 = l3;
             }
-            if(ImGui.SliderFloat("l4", ref l4, 1, 5))
+
+            if (ImGui.SliderFloat("l4", ref l4, 1, 5))
             {
                 _puma.L4 = l4;
             }

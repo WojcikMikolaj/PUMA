@@ -205,17 +205,17 @@ public class PUMA
 
     Matrix4 _a5Matrix = Matrix4.Identity;
 
-    public void Render(Shader shader, Matrix4 cameraMatrix)
+    public void Render(Shader shader, Matrix4 projectionViewMatrix)
     {
-        shader.LoadMatrix4("mvp", _f01 * cameraMatrix);
+        shader.LoadMatrix4("mvp", _f01 * projectionViewMatrix);
         _l1.Render();
-        shader.LoadMatrix4("mvp", _f02 * cameraMatrix);
+        shader.LoadMatrix4("mvp", _f02 * projectionViewMatrix);
         _q2.Render();
-        shader.LoadMatrix4("mvp", _f03 * cameraMatrix);
+        shader.LoadMatrix4("mvp", _f03 * projectionViewMatrix);
         _l3.Render();
-        shader.LoadMatrix4("mvp", _f04 * cameraMatrix);
+        shader.LoadMatrix4("mvp", _f04 * projectionViewMatrix);
         _l4.Render();
-        shader.LoadMatrix4("mvp", _f05 * cameraMatrix);
+        shader.LoadMatrix4("mvp", _f05 * projectionViewMatrix);
         _l5.Render();
     }
 }
