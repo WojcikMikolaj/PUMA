@@ -177,7 +177,7 @@ public class Program : GameWindow
 
             ImGui.Text("Rotacja startowa");
             System.Numerics.Vector3 sRot = _startingPointer.Rot.ToNumerics();
-            if (ImGui.InputFloat3("sRot", ref sRot))
+            if (ImGui.SliderFloat3("sRot", ref sRot, 0, 360))
             {
                 _startingPointer.Rot = sRot.ToOpenTK();
                 _puma.MoveToPoint(_startingPointer.Pos, _startingPointer.Rot);
