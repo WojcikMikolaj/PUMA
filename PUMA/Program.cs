@@ -172,13 +172,15 @@ public class Program : GameWindow
             if (ImGui.InputFloat3("sPos", ref sPos))
             {
                 _startingPointer.Pos = sPos.ToOpenTK();
+                _puma.MoveToPoint(_startingPointer.Pos, _startingPointer.Rot);
             }
 
             ImGui.Text("Rotacja startowa");
             System.Numerics.Vector3 sRot = _startingPointer.Rot.ToNumerics();
-            if (ImGui.SliderFloat3("sRot", ref sRot, 0, 360))
+            if (ImGui.InputFloat3("sRot", ref sRot))
             {
                 _startingPointer.Rot = sRot.ToOpenTK();
+                _puma.MoveToPoint(_startingPointer.Pos, _startingPointer.Rot);
             }
 
             ImGui.Spacing();

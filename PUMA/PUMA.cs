@@ -218,4 +218,22 @@ public class PUMA
         shader.LoadMatrix4("mvp", _f05 * projectionViewMatrix);
         _l5.Render();
     }
+
+    public bool MoveToPoint(Vector3 pos, Vector3 rotInDeg)
+    {
+        var newConf = IKPUMASolver.SolveInverse(pos, (MH.DegreesToRadians(rotInDeg.X), MH.DegreesToRadians(rotInDeg.Y), MH.DegreesToRadians(rotInDeg.Z)), new PUMASettings(_l1.h, _l3.h, _l4.h));
+        if (!newConf.IsNaNOrInf())
+        {
+            var newConfInDeg = newConf.InDegrees();
+            _alpha1 = newConfInDeg.a1;
+            _q2.h = newConfInDeg.q2;
+            _alpha2 = newConfInDeg.a2;
+            _alpha3 = newConfInDeg.a3;
+            _alpha4 = newConfInDeg.a4;
+            _alpha5 = newConfInDeg.a5;
+            RecalculateMatrices();
+            return true;
+        }
+        return false;
+    }
 }
