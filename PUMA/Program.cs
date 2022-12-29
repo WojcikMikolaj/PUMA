@@ -208,6 +208,8 @@ public class Program : GameWindow
             {
                 _puma.SolutionNumber = pumaSolutionNumber;
             }
+            
+            ImGui.Text(_puma.endPosition.ToString());
         }
 
         if (ImGui.CollapsingHeader("Parametry"))

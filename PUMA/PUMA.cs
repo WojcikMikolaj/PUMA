@@ -64,6 +64,8 @@ public class PUMA
         _f03 = _a3Matrix * _q2Matrix * _f02;
         _f04 = _a4Matrix * _l3Matrix * _f03;
         _f05 = _a5Matrix * _l4Matrix * _f04;
+
+        endPosition = (new Vector4(0, 0, 0, 1) * _f05).Xyz;
     }
 
     Matrix4 _f01 = Matrix4.Identity;
@@ -232,7 +234,7 @@ public class PUMA
     }
 
     private Solution[] _solutions;
-
+    public Vector3 endPosition = new Vector3();
     public void ChooseSolution()
     {
         if (_solutions != null)
