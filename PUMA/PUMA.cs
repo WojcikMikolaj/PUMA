@@ -29,7 +29,7 @@ public class PUMA
             h = 1
         };
         R = 0.1f;
-        
+
         _l5 = new Cylinder(Direction.X);
         _l5.r = 0.05f;
         _l5.h = 0.1f;
@@ -43,19 +43,19 @@ public class PUMA
         _q2Matrix = Matrix4.CreateTranslation(_q2.h, 0, 0);
         _l3Matrix = Matrix4.CreateTranslation(0, 0, -_l3.h);
         _l4Matrix = Matrix4.CreateTranslation(_l4.h, 0, 0);
-        
+
         var a1 = MH.DegreesToRadians(_alpha1);
         _a1Matrix = Matrix4.CreateRotationZ(a1);
-        
+
         var a2 = MH.DegreesToRadians(_alpha2);
         _a2Matrix = Matrix4.CreateRotationY(a2);
-        
+
         var a3 = MH.DegreesToRadians(_alpha3);
         _a3Matrix = Matrix4.CreateRotationY(a3);
-        
+
         var a4 = MH.DegreesToRadians(_alpha4);
         _a4Matrix = Matrix4.CreateRotationZ(a4);
-        
+
         var a5 = MH.DegreesToRadians(_alpha5);
         _a5Matrix = Matrix4.CreateRotationX(a5);
 
@@ -65,7 +65,7 @@ public class PUMA
         _f04 = _a4Matrix * _l3Matrix * _f03;
         _f05 = _a5Matrix * _l4Matrix * _f04;
     }
-    
+
     Matrix4 _f01 = Matrix4.Identity;
     Matrix4 _f02 = Matrix4.Identity;
     Matrix4 _f03 = Matrix4.Identity;
@@ -203,6 +203,18 @@ public class PUMA
         }
     }
 
+    private int _solutionNumber = 0;
+
+    public int SolutionNumber
+    {
+        get => _solutionNumber;
+        set
+        {
+            _solutionNumber = value;
+            ChooseSolution();
+        }
+    }
+
     Matrix4 _a5Matrix = Matrix4.Identity;
 
     public void Render(Shader shader, Matrix4 projectionViewMatrix)
@@ -219,10 +231,63 @@ public class PUMA
         _l5.Render();
     }
 
+    private Solution[] _solutions;
+
+    public void ChooseSolution()
+    {
+        if (_solutions != null)
+        {
+            var newConf = new PUMAConfiguration(
+                _solutions[SolutionNumber].a1.a,
+                _solutions[SolutionNumber].q2,
+                _solutions[SolutionNumber].a2.a,
+                _solutions[SolutionNumber].a3.a,
+                _solutions[SolutionNumber].a4.a,
+                _solutions[SolutionNumber].a5.a);
+
+            if (!newConf.IsNaNOrInf())
+            {
+                var newConfInDeg = newConf.InDegrees();
+                _alpha1 = newConfInDeg.a1;
+                _q2.h = newConfInDeg.q2;
+                _alpha2 = newConfInDeg.a2;
+                _alpha3 = newConfInDeg.a3;
+                _alpha4 = newConfInDeg.a4;
+                _alpha5 = newConfInDeg.a5;
+                RecalculateMatrices();
+            }
+        }
+    }
+    
     public bool MoveToPoint(Vector3 pos, Vector3 rotInDeg)
     {
-        var newConf = IKPUMASolver.SolveInverse(pos, (MH.DegreesToRadians(rotInDeg.X), MH.DegreesToRadians(rotInDeg.Y), MH.DegreesToRadians(rotInDeg.Z)), new PUMASettings(_l1.h, _l3.h, _l4.h));
-        if (!newConf.IsNaNOrInf())
+        var solutions = IKPUMASolver.SolveInverse(pos,
+            (MH.DegreesToRadians(rotInDeg.X), MH.DegreesToRadians(rotInDeg.Y), MH.DegreesToRadians(rotInDeg.Z)),
+            new PUMASettings(_l1.h, _l3.h, _l4.h));
+        _solutions = solutions;
+        
+        int bestSolution = 0;
+        float distance = float.MaxValue;
+        
+        for (int i = 0; i < solutions.Length; i++)
+        {
+            var dist = CalculateDistance(pos, solutions[i]);
+            if (dist < distance)
+            {
+                distance = dist;
+                bestSolution = i;
+            }
+        }
+
+        var newConf = new PUMAConfiguration(
+            solutions[bestSolution].a1.a,
+            solutions[bestSolution].q2,
+            solutions[bestSolution].a2.a,
+            solutions[bestSolution].a3.a,
+            solutions[bestSolution].a4.a,
+            solutions[bestSolution].a5.a);
+
+        if (!newConf.IsNaNOrInf() && Math.Abs(distance - float.MaxValue) > 0.1)
         {
             var newConfInDeg = newConf.InDegrees();
             _alpha1 = newConfInDeg.a1;
@@ -235,5 +300,38 @@ public class PUMA
             return true;
         }
         return false;
+    }
+
+    private float CalculateDistance(Vector3 targetPos, Solution solution)
+    {
+        var l1Matrix = Matrix4.CreateTranslation(0, 0, _l1.h);
+        var q2Matrix = Matrix4.CreateTranslation(solution.q2, 0, 0);
+        var l3Matrix = Matrix4.CreateTranslation(0, 0, -_l3.h);
+        var l4Matrix = Matrix4.CreateTranslation(_l4.h, 0, 0);
+
+        var a1 = MH.DegreesToRadians(solution.a1.a);
+        var a1Matrix = Matrix4.CreateRotationZ(a1);
+
+        var a2 = MH.DegreesToRadians(solution.a2.a);
+        var a2Matrix = Matrix4.CreateRotationY(a2);
+
+        var a3 = MH.DegreesToRadians(solution.a3.a);
+        var a3Matrix = Matrix4.CreateRotationY(a3);
+
+        var a4 = MH.DegreesToRadians(solution.a4.a);
+        var a4Matrix = Matrix4.CreateRotationZ(a4);
+
+        var a5 = MH.DegreesToRadians(solution.a5.a);
+        var a5Matrix = Matrix4.CreateRotationX(a5);
+
+        var f01 = a1Matrix;
+        var f02 = a2Matrix * l1Matrix * f01;
+        var f03 = a3Matrix * q2Matrix * f02;
+        var f04 = a4Matrix * l3Matrix * f03;
+        var f05 = a5Matrix * l4Matrix * f04;
+
+        var newPos = new Vector4(targetPos.X, targetPos.Y, targetPos.Z, 1) * f05;
+
+        return Vector3.Distance(targetPos, newPos.Xyz);
     }
 }

@@ -202,6 +202,12 @@ public class Program : GameWindow
             {
                 _endingPointer.Rot = eRot.ToOpenTK();
             }
+
+            var pumaSolutionNumber = _puma.SolutionNumber;
+            if (ImGui.SliderInt("num", ref pumaSolutionNumber, 0, 7))
+            {
+                _puma.SolutionNumber = pumaSolutionNumber;
+            }
         }
 
         if (ImGui.CollapsingHeader("Parametry"))
