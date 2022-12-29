@@ -309,20 +309,11 @@ public class PUMA
         var l3Matrix = Matrix4.CreateTranslation(0, 0, -_l3.h);
         var l4Matrix = Matrix4.CreateTranslation(_l4.h, 0, 0);
 
-        var a1 = MH.DegreesToRadians(solution.a1.a);
-        var a1Matrix = Matrix4.CreateRotationZ(a1);
-
-        var a2 = MH.DegreesToRadians(solution.a2.a);
-        var a2Matrix = Matrix4.CreateRotationY(a2);
-
-        var a3 = MH.DegreesToRadians(solution.a3.a);
-        var a3Matrix = Matrix4.CreateRotationY(a3);
-
-        var a4 = MH.DegreesToRadians(solution.a4.a);
-        var a4Matrix = Matrix4.CreateRotationZ(a4);
-
-        var a5 = MH.DegreesToRadians(solution.a5.a);
-        var a5Matrix = Matrix4.CreateRotationX(a5);
+        var a1Matrix = Matrix4.CreateRotationZ(solution.a1.a);
+        var a2Matrix = Matrix4.CreateRotationY(solution.a2.a);
+        var a3Matrix = Matrix4.CreateRotationY(solution.a3.a);
+        var a4Matrix = Matrix4.CreateRotationZ(solution.a4.a);
+        var a5Matrix = Matrix4.CreateRotationX(solution.a5.a);
 
         var f01 = a1Matrix;
         var f02 = a2Matrix * l1Matrix * f01;
@@ -330,7 +321,7 @@ public class PUMA
         var f04 = a4Matrix * l3Matrix * f03;
         var f05 = a5Matrix * l4Matrix * f04;
 
-        var newPos = new Vector4(targetPos.X, targetPos.Y, targetPos.Z, 1) * f05;
+        var newPos = new Vector4(0, 0, 0, 1) * f05;
 
         return Vector3.Distance(targetPos, newPos.Xyz);
     }

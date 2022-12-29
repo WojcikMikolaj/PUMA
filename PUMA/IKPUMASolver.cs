@@ -77,15 +77,17 @@ public static class IKPUMASolver
         var py = f05.M24;
         var pz = f05.M34;
 
-        var solutions = new List<Solution>();
-        solutions.Add(new Solution());
-        solutions.Add(new Solution());
-        solutions.Add(new Solution());
-        solutions.Add(new Solution());
-        solutions.Add(new Solution());
-        solutions.Add(new Solution());
-        solutions.Add(new Solution());
-        solutions.Add(new Solution());
+        var solutions = new List<Solution>
+        {
+            new Solution(),
+            new Solution(),
+            new Solution(),
+            new Solution(),
+            new Solution(),
+            new Solution(),
+            new Solution(),
+            new Solution()
+        };
 
 
         for (int i = 0; i < solutions.Count; i++)
@@ -97,7 +99,7 @@ public static class IKPUMASolver
             //Asin - 2 rozwiązania
             //Alpha4
             solutions[i].a4 = CalculateA4(xy, xx, solutions[i].a1,
-                i < solutions.Count / 4 || i >= solutions.Count / 4 * 3);
+                i < solutions.Count / 4 || (i >= solutions.Count / 2  && i < solutions.Count/4* 3));
 
             //Atan2 - 1 rozwiązanie
             //Alpha5
