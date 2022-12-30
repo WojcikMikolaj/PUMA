@@ -25,7 +25,8 @@ public class PUMA
 
     private Vector3 lastPos;
     private Vector3 lastRotInRad;
-    
+    private PUMAConfiguration lastConf;
+
     private readonly bool InterpolateConf; 
 
     public PUMA(bool interpolateConf)
@@ -354,7 +355,7 @@ public class PUMA
             MH.DegreesToRadians(startingPointerRot.Y),
             MH.DegreesToRadians(startingPointerRot.Z));
         
-        startConf = IKPUMASolver.SolveInverse(startPos, startRotInRad,
+        lastConf = startConf = IKPUMASolver.SolveInverse(startPos, startRotInRad,
             new PUMASettings(_l1.h, _l3.h, _l4.h))[0].ToConf();
     }
     
@@ -392,7 +393,38 @@ public class PUMA
         else
         {
             var currPos = (1.0f - t) * startPos + t * endPos;
-            var currRotInRad = (1.0f - t) * startRotInRad + t * endRotInRad;
+            var radX =0.0f;
+            if (MH.Abs(startRotInRad.X - endRotInRad.X) < MH.Pi)
+            {
+                radX = (1.0f - t) * startRotInRad.X + t * endRotInRad.X;
+            }
+            else
+            {
+                radX = (1.0f - t) * startRotInRad.X + t * (MH.TwoPi - endRotInRad.X);
+            }
+            
+            var radY =0.0f;
+            if (MH.Abs(startRotInRad.Y - endRotInRad.Y) < MH.Pi)
+            {
+                radY = (1.0f - t) * startRotInRad.Y + t * endRotInRad.Y;
+            }
+            else
+            {
+                radY = (1.0f - t) * startRotInRad.Y + t * (MH.TwoPi - endRotInRad.Y);
+            }
+            
+            var radZ =0.0f;
+            if (MH.Abs(startRotInRad.Z - endRotInRad.Z) < MH.Pi)
+            {
+                radZ = (1.0f - t) * startRotInRad.Z + t * endRotInRad.Z;
+            }
+            else
+            {
+                radZ = (1.0f - t) * startRotInRad.Z + t * (MH.TwoPi - endRotInRad.Z);
+            }
+
+            var currRotInRad = (radX, radY, radZ);
+            
             
             var solutions = IKPUMASolver.SolveInverse(currPos, currRotInRad,
                 new PUMASettings(_l1.h, _l3.h, _l4.h));
@@ -401,7 +433,7 @@ public class PUMA
             float distance = float.MaxValue;
             for (int i = 0; i < solutions.Length; i++)
             {
-                var dist = CalculateDistance(lastPos, solutions[i]);
+                var dist = CalculateDistance(lastConf, solutions[i]);
                 if (dist < distance)
                 {
                     distance = dist;
@@ -433,5 +465,25 @@ public class PUMA
 
     //        throw new ApplicationException();
         }
+    }
+
+    private float CalculateDistance(PUMAConfiguration lastConf, Solution solution)
+    {
+        var solutionConf = new PUMAConfiguration(
+            solution.a1.a,
+            solution.q2,
+            solution.a2.a,
+            solution.a3.a,
+            solution.a4.a,
+            solution.a5.a);
+
+        float distance = 0.0f;
+        distance = MathF.Abs(solutionConf.q2 - lastConf.q2);
+        distance += MH.Min(MH.Abs(MH.ClampRadians(lastConf.a1) - MH.ClampRadians(solutionConf.a1)), MH.Abs(MH.TwoPi - MH.ClampRadians(lastConf.a1) + MH.ClampRadians(solutionConf.a1)));
+        distance += MH.Min(MH.Abs(MH.ClampRadians(lastConf.a2) - MH.ClampRadians(solutionConf.a2)), MH.Abs(MH.TwoPi - MH.ClampRadians(lastConf.a2) + MH.ClampRadians(solutionConf.a2)));
+        distance += MH.Min(MH.Abs(MH.ClampRadians(lastConf.a3) - MH.ClampRadians(solutionConf.a3)), MH.Abs(MH.TwoPi - MH.ClampRadians(lastConf.a3) + MH.ClampRadians(solutionConf.a3)));
+        distance += MH.Min(MH.Abs(MH.ClampRadians(lastConf.a4) - MH.ClampRadians(solutionConf.a4)), MH.Abs(MH.TwoPi - MH.ClampRadians(lastConf.a4) + MH.ClampRadians(solutionConf.a4)));
+        distance += MH.Min(MH.Abs(MH.ClampRadians(lastConf.a5) - MH.ClampRadians(solutionConf.a5)), MH.Abs(MH.TwoPi - MH.ClampRadians(lastConf.a5) + MH.ClampRadians(solutionConf.a5)));
+        return distance;
     }
 }
