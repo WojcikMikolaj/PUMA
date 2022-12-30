@@ -1,4 +1,5 @@
-﻿using OpenTK.Mathematics;
+﻿using System.ComponentModel.DataAnnotations;
+using OpenTK.Mathematics;
 using MH = OpenTK.Mathematics.MathHelper;
 
 namespace TemplateProject;
@@ -12,21 +13,39 @@ public class PUMA
     private readonly Cylinder _l4;
     private readonly Cylinder _l5;
 
+    private Vector3 startPos;
+    private Vector3 startRotInRad;
+    private PUMAConfiguration startConf;
+    
+    private PUMAConfiguration currConf;
+    
+    private Vector3 endPos;
+    private Vector3 endRotInRad;
+    private PUMAConfiguration endConf;
 
-    public PUMA()
+    private Vector3 lastPos;
+    private Vector3 lastRotInRad;
+    
+    private readonly bool InterpolateConf; 
+
+    public PUMA(bool interpolateConf)
     {
+        InterpolateConf = interpolateConf;
         _l1 = new Cylinder(Direction.Z)
         {
             h = 3
         };
-        _q2 = new Cylinder(Direction.X);
+        _q2 = new Cylinder(Direction.X)
+        {
+            h = 3
+        };
         _l3 = new Cylinder(Direction.NZ)
         {
-            h = 1
+            h = 3
         };
         _l4 = new Cylinder(Direction.X)
         {
-            h = 1
+            h = 3
         };
         R = 0.1f;
 
@@ -326,5 +345,93 @@ public class PUMA
         var newPos = new Vector4(0, 0, 0, 1) * f05;
 
         return Vector3.Distance(targetPos, newPos.Xyz);
+    }
+
+    public void SetStartPoint(Vector3 startingPointerPos, Vector3 startingPointerRot)
+    {
+        lastPos = startPos = startingPointerPos;
+        lastRotInRad = startRotInRad = (MH.DegreesToRadians(startingPointerRot.X),
+            MH.DegreesToRadians(startingPointerRot.Y),
+            MH.DegreesToRadians(startingPointerRot.Z));
+        
+        startConf = IKPUMASolver.SolveInverse(startPos, startRotInRad,
+            new PUMASettings(_l1.h, _l3.h, _l4.h))[0].ToConf();
+    }
+    
+    public void SetEndPoint(Vector3 endingPointerPos, Vector3 endingPointerRot)
+    {
+        endPos = endingPointerPos;
+        endRotInRad = (MH.DegreesToRadians(endingPointerRot.X),
+            MH.DegreesToRadians(endingPointerRot.Y),
+                MH.DegreesToRadians(endingPointerRot.Z));
+        
+        endConf = IKPUMASolver.SolveInverse(endPos, endRotInRad,
+            new PUMASettings(_l1.h, _l3.h, _l4.h))[0].ToConf();
+    }
+
+    public void CalculateCurrentConfiguration([Range(0,1)] float t)
+    {
+        if (InterpolateConf)
+        {
+            var a1 = (1.0f - t) * startConf.a1 + t * endConf.a1;
+            var q2 = (1.0f - t) * startConf.q2 + t * endConf.q2;
+            var a2 = (1.0f - t) * startConf.a2 + t * endConf.a2;
+            var a3 = (1.0f - t) * startConf.a3 + t * endConf.a3;
+            var a4 = (1.0f - t) * startConf.a4 + t * endConf.a4;
+            var a5 = (1.0f - t) * startConf.a5 + t * endConf.a5;
+            
+            currConf = new PUMAConfiguration(a1, q2, a2, a3, a4, a5);
+            _alpha1 = MH.RadiansToDegrees(a1);
+            _alpha2 = MH.RadiansToDegrees(a2);
+            _alpha3 = MH.RadiansToDegrees(a3);
+            _alpha4 = MH.RadiansToDegrees(a4);
+            _alpha5 = MH.RadiansToDegrees(a5);
+            _q2.h = q2;
+            RecalculateMatrices();
+        }
+        else
+        {
+            var currPos = (1.0f - t) * startPos + t * endPos;
+            var currRotInRad = (1.0f - t) * startRotInRad + t * endRotInRad;
+            
+            var solutions = IKPUMASolver.SolveInverse(currPos, currRotInRad,
+                new PUMASettings(_l1.h, _l3.h, _l4.h));
+            
+            int bestSolution = 0;
+            float distance = float.MaxValue;
+            for (int i = 0; i < solutions.Length; i++)
+            {
+                var dist = CalculateDistance(lastPos, solutions[i]);
+                if (dist < distance)
+                {
+                    distance = dist;
+                    bestSolution = i;
+                }
+            }
+
+            var newConf = new PUMAConfiguration(
+                solutions[bestSolution].a1.a,
+                solutions[bestSolution].q2,
+                solutions[bestSolution].a2.a,
+                solutions[bestSolution].a3.a,
+                solutions[bestSolution].a4.a,
+                solutions[bestSolution].a5.a);
+
+            if (!newConf.IsNaNOrInf() && Math.Abs(distance - float.MaxValue) > 0.1)
+            {
+                var newConfInDeg = newConf.InDegrees();
+                _alpha1 = newConfInDeg.a1;
+                _q2.h = newConfInDeg.q2;
+                _alpha2 = newConfInDeg.a2;
+                _alpha3 = newConfInDeg.a3;
+                _alpha4 = newConfInDeg.a4;
+                _alpha5 = newConfInDeg.a5;
+                RecalculateMatrices();
+                lastPos = currPos;
+                lastRotInRad = currRotInRad;
+            }
+
+    //        throw new ApplicationException();
+        }
     }
 }

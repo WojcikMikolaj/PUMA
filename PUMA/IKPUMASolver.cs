@@ -49,18 +49,30 @@ public class Solution
     public AngleParam a4;
     public AngleParam a5;
     public float q2;
+
+    public PUMAConfiguration ToConf()
+    {
+        return new PUMAConfiguration(
+            a1.a,
+            q2,
+            a2.a,
+            a3.a,
+            a4.a,
+            a5.a);
+    }
 }
 
 public static class IKPUMASolver
 {
-    public static Solution[] SolveInverse(Vector3 targetPosition, Vector3 targetRotation,
+    public static Solution[] SolveInverse(Vector3 targetPosition, Vector3 targetRotationInRad,
         PUMASettings settings, PUMAConfiguration lastConfiguration = null)
     {
-        Matrix4 f05 = Matrix4.CreateRotationX(targetRotation.X) *
-                      Matrix4.CreateRotationY(targetRotation.Y) * Matrix4.CreateRotationZ(targetRotation.Z) *
+        Matrix4 f05 = Matrix4.CreateRotationX(targetRotationInRad.X) *
+                      Matrix4.CreateRotationY(targetRotationInRad.Y) * Matrix4.CreateRotationZ(targetRotationInRad.Z) *
                       Matrix4.CreateTranslation(targetPosition);
         f05.Transpose();
-
+        
+        
         var xx = f05.M11;
         var xy = f05.M21;
         var xz = f05.M31;
@@ -113,7 +125,7 @@ public static class IKPUMASolver
             solutions[i].q2 = CalculateQ2(settings, px, xx, xz, solutions[i].a1, solutions[i].a2, solutions[i].a4);
             
             //Atan2 - 1 rozwiązanie
-            solutions[i].a3 = CalculateA3(xz, xx, solutions[i].a1, solutions[i].a4);
+            solutions[i].a3 = CalculateA3(xz, xx, solutions[i].a1, solutions[i].a2, solutions[i].a4);
         }
 
         return solutions.ToArray();
@@ -154,9 +166,9 @@ public static class IKPUMASolver
         return new AngleParam(a2, s2, c2);
     }
 
-    private static AngleParam CalculateA3(float xz, float xx, AngleParam a1, AngleParam a4)
+    private static AngleParam CalculateA3(float xz, float xx, AngleParam a1,AngleParam a2, AngleParam a4)
     {
-        var a3 = (float) MH.Atan2(-xz / a4.c, (xx + a1.s * a4.s) / (a1.c * a4.c));
+        var a3 = (float) MH.Atan2(-xz / a4.c, (xx + a1.s * a4.s) / (a1.c * a4.c)) - a2.a;
         var s3 = (float) MH.Sin(a3);
         var c3 = (float) MH.Cos(a3);
 

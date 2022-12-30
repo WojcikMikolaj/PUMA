@@ -23,10 +23,17 @@ public class Program : GameWindow
     private Texture texture;
 
     private PUMA _puma;
+    private PUMA _puma2;
 
     private Pointer _startingPointer;
     private Pointer _endingPointer;
 
+    private ApplicationState _state;
+
+    private float _dt = 0.2f;
+    private float _currAnimTime = 0;
+    private float _animTime = 5;
+    
     public static void Main(string[] args)
     {
         using var program = new Program(GameWindowSettings.Default, NativeWindowSettings.Default);
@@ -87,9 +94,21 @@ public class Program : GameWindow
 
     private void InitializeScene()
     {
-        _puma = new PUMA();
+        _puma = new PUMA(false);
+        _puma2 = new PUMA(true);
         _startingPointer = new Pointer();
         _endingPointer = new Pointer();
+        _startingPointer.Pos = (6, 0, 0);
+        
+        _puma.MoveToPoint(_startingPointer.Pos, _startingPointer.Rot);
+        _puma.SetStartPoint(_startingPointer.Pos, _startingPointer.Rot);
+        _puma.SetEndPoint(_endingPointer.Pos, _endingPointer.Rot);
+        
+        _puma2.MoveToPoint(_startingPointer.Pos, _startingPointer.Rot);
+        _puma2.SetStartPoint(_startingPointer.Pos, _startingPointer.Rot);
+        _puma2.SetEndPoint(_endingPointer.Pos, _endingPointer.Rot);
+
+        //camera.Move(0,-10,0);
     }
 
     protected override void OnUnload()
@@ -112,9 +131,8 @@ public class Program : GameWindow
         }
 
         base.OnResize(e);
-        GL.Viewport(0, 0, Size.X, Size.Y);
         controller.WindowResized(ClientSize.X, ClientSize.Y);
-        camera.Aspect = (float) Size.X / Size.Y;
+        camera.Aspect = (float) Size.X / 2 / Size.Y;
     }
 
     protected override void OnUpdateFrame(FrameEventArgs args)
@@ -136,25 +154,54 @@ public class Program : GameWindow
     protected override void OnRenderFrame(FrameEventArgs args)
     {
         base.OnRenderFrame(args);
-
         GL.Disable(EnableCap.CullFace);
         GL.Enable(EnableCap.DepthTest);
         GL.DepthFunc(DepthFunction.Lequal);
-
         GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+        
+        if (_state == ApplicationState.Animation)
+        {
+            _currAnimTime += _dt;
+            _puma.CalculateCurrentConfiguration(_currAnimTime/_animTime);
+            _puma2.CalculateCurrentConfiguration(_currAnimTime/_animTime);
+            if (_currAnimTime > _animTime)
+            {
+                _state = ApplicationState.Default;
+            }
+        }
 
-        defaultShader.Use();
-        texture.Use();
-        defaultShader.LoadInteger("sampler", 0);
-        defaultShader.LoadMatrix4("mvp", camera.GetProjectionViewMatrix());
-        //rectangle.Render();
-        _puma.Render(defaultShader, camera.GetProjectionViewMatrix());
+        
+
+        //Lewa strona - dużo IK
+        {
+            GL.Viewport(0, 0, Size.X / 2, Size.Y);
+            defaultShader.Use();
+            texture.Use();
+            defaultShader.LoadInteger("sampler", 0);
+            defaultShader.LoadMatrix4("mvp", camera.GetProjectionViewMatrix());
+            _puma.Render(defaultShader, camera.GetProjectionViewMatrix());
 
 
-        pointerShader.Use();
-        _startingPointer.Render(pointerShader, camera.GetProjectionViewMatrix());
-        _endingPointer.Render(pointerShader, camera.GetProjectionViewMatrix());
+            pointerShader.Use();
+            _startingPointer.Render(pointerShader, camera.GetProjectionViewMatrix());
+            _endingPointer.Render(pointerShader, camera.GetProjectionViewMatrix());
+        }
 
+        //Prawa strona - 2 IK
+        {
+            GL.Viewport(Size.X / 2, 0, Size.X / 2, Size.Y);
+            //GL.Clear(ClearBufferMask.DepthBufferBit); może?
+            defaultShader.Use();
+            texture.Use();
+            defaultShader.LoadInteger("sampler", 0);
+            defaultShader.LoadMatrix4("mvp", camera.GetProjectionViewMatrix());
+            _puma2.Render(defaultShader, camera.GetProjectionViewMatrix());
+            
+            pointerShader.Use();
+            _startingPointer.Render(pointerShader, camera.GetProjectionViewMatrix());
+            _endingPointer.Render(pointerShader, camera.GetProjectionViewMatrix());
+        }
+        GL.Viewport(0, 0, Size.X, Size.Y);
         RenderGui();
 
         Context.SwapBuffers();
@@ -173,6 +220,10 @@ public class Program : GameWindow
             {
                 _startingPointer.Pos = sPos.ToOpenTK();
                 _puma.MoveToPoint(_startingPointer.Pos, _startingPointer.Rot);
+                _puma2.MoveToPoint(_startingPointer.Pos, _startingPointer.Rot);
+                
+                _puma.SetStartPoint(_startingPointer.Pos, _startingPointer.Rot);
+                _puma2.SetStartPoint(_startingPointer.Pos, _startingPointer.Rot);
             }
 
             ImGui.Text("Rotacja startowa");
@@ -181,6 +232,10 @@ public class Program : GameWindow
             {
                 _startingPointer.Rot = sRot.ToOpenTK();
                 _puma.MoveToPoint(_startingPointer.Pos, _startingPointer.Rot);
+                _puma2.MoveToPoint(_startingPointer.Pos, _startingPointer.Rot);
+                
+                _puma.SetStartPoint(_startingPointer.Pos, _startingPointer.Rot);
+                _puma2.SetStartPoint(_startingPointer.Pos, _startingPointer.Rot);
             }
 
             ImGui.Spacing();
@@ -194,6 +249,8 @@ public class Program : GameWindow
             if (ImGui.InputFloat3("ePos", ref ePos))
             {
                 _endingPointer.Pos = ePos.ToOpenTK();
+                _puma.SetEndPoint(_endingPointer.Pos, _endingPointer.Rot);
+                _puma2.SetEndPoint(_endingPointer.Pos, _endingPointer.Rot);
             }
 
             ImGui.Text("Rotacja koncowa");
@@ -201,6 +258,8 @@ public class Program : GameWindow
             if (ImGui.SliderFloat3("eRot", ref eRot, 0, 360))
             {
                 _endingPointer.Rot = eRot.ToOpenTK();
+                _puma.SetEndPoint(_endingPointer.Pos, _endingPointer.Rot);
+                _puma2.SetEndPoint(_endingPointer.Pos, _endingPointer.Rot);
             }
 
             var pumaSolutionNumber = _puma.SolutionNumber;
@@ -208,8 +267,17 @@ public class Program : GameWindow
             {
                 _puma.SolutionNumber = pumaSolutionNumber;
             }
-            
+
             ImGui.Text(_puma.endPosition.ToString());
+
+            if (ImGui.Button("Start"))
+            {
+                _currAnimTime = 0;
+                _state = ApplicationState.Animation;
+            }
+
+            ImGui.SliderFloat("predkosc animacji", ref _dt, 0.01f, 1);
+            ImGui.SliderFloat("dlugosc animacji", ref _animTime, 0.01f, 10);
         }
 
         if (ImGui.CollapsingHeader("Parametry"))
