@@ -394,7 +394,7 @@ public class PUMA
         {
             var currPos = (1.0f - t) * startPos + t * endPos;
             var radX =0.0f;
-            if (MH.Abs(startRotInRad.X - endRotInRad.X) < MH.Pi)
+            if (MH.Abs(startRotInRad.X - endRotInRad.X) >= MH.Pi)
             {
                 radX = (1.0f - t) * startRotInRad.X + t * endRotInRad.X;
             }
@@ -404,7 +404,7 @@ public class PUMA
             }
             
             var radY =0.0f;
-            if (MH.Abs(startRotInRad.Y - endRotInRad.Y) < MH.Pi)
+            if (MH.Abs(startRotInRad.Y - endRotInRad.Y) >= MH.Pi)
             {
                 radY = (1.0f - t) * startRotInRad.Y + t * endRotInRad.Y;
             }
@@ -414,7 +414,7 @@ public class PUMA
             }
             
             var radZ =0.0f;
-            if (MH.Abs(startRotInRad.Z - endRotInRad.Z) < MH.Pi)
+            if (MH.Abs(startRotInRad.Z - endRotInRad.Z) >= MH.Pi)
             {
                 radZ = (1.0f - t) * startRotInRad.Z + t * endRotInRad.Z;
             }
@@ -451,7 +451,7 @@ public class PUMA
 
             lastConf = newConf;
             
-            if (!newConf.IsNaNOrInf() && Math.Abs(distance - float.MaxValue) > 0.1)
+            if (!newConf.IsNaNOrInf() && distance != float.MaxValue)
             {
                 var newConfInDeg = newConf.InDegrees();
                 _alpha1 = newConfInDeg.a1;
