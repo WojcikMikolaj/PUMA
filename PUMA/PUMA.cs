@@ -404,40 +404,41 @@ public class PUMA
         else
         {
             var currPos = (1.0f - t) * startPos + t * endPos;
-            // var radX =0.0f;
-            // if (MH.Abs(startRotInRad.X - endRotInRad.X) >= MH.Pi)
-            // {
-            //     radX = (1.0f - t) * startRotInRad.X + t * endRotInRad.X;
-            // }
-            // else
-            // {
-            //     radX = (1.0f - t) * startRotInRad.X + t * (MH.TwoPi - endRotInRad.X);
-            // }
-            //
-            // var radY =0.0f;
-            // if (MH.Abs(startRotInRad.Y - endRotInRad.Y) < MH.Pi)
-            // {
-            //     radY = (1.0f - t) * startRotInRad.Y + t * endRotInRad.Y;
-            // }
-            // else
-            // {
-            //     radY = (1.0f - t) * startRotInRad.Y + t * (MH.TwoPi - endRotInRad.Y);
-            // }
-            //
-            // var radZ =0.0f;
-            // if (MH.Abs(startRotInRad.Z - endRotInRad.Z) < MH.Pi)
-            // {
-            //     radZ = (1.0f - t) * startRotInRad.Z + t * endRotInRad.Z;
-            // }
-            // else
-            // {
-            //     radZ = (1.0f - t) * startRotInRad.Z + t * (MH.TwoPi - endRotInRad.Z);
-            // }
-            //
-            // var currRotInRad = (radX, radY, radZ);
-
             var currRotInRad = (1.0f - t) * startRotInRad + t * endRotInRad;
             
+            var radX =0.0f;
+            if (MH.Abs(startRotInRad.X - endRotInRad.X) < MH.Pi)
+            {
+                radX = (1.0f - t) * startRotInRad.X + t * endRotInRad.X;
+            }
+            else
+            {
+                radX = (1.0f - t) * startRotInRad.X + t * -(MH.TwoPi - endRotInRad.X);
+            }
+
+            var radY =0.0f;
+            if (MH.Abs(startRotInRad.Y - endRotInRad.Y) < MH.Pi)
+            {
+                radY = (1.0f - t) * startRotInRad.Y + t * endRotInRad.Y;
+            }
+            else
+            {
+                radY = (1.0f - t) * startRotInRad.Y + t * -(MH.TwoPi - endRotInRad.Y);
+            }
+
+            var radZ =0.0f;
+            if (MH.Abs(startRotInRad.Z - endRotInRad.Z) < MH.Pi)
+            {
+                radZ = (1.0f - t) * startRotInRad.Z + t * endRotInRad.Z;
+            }
+            else
+            {
+                radZ = (1.0f - t) * startRotInRad.Z + t * -(MH.TwoPi - endRotInRad.Z);
+            }
+
+            currRotInRad = (radX, radY, radZ);
+
+
             var solutions = IKPUMASolver.SolveInverse(currPos, currRotInRad,
                 new PUMASettings(_l1.h, _l3.h, _l4.h));
             
