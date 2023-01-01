@@ -491,13 +491,14 @@ public class PUMA
             solution.a4.a,
             solution.a5.a);
 
+        
         float distance = 0.0f;
         distance = 0; //MathF.Abs(solutionConf.q2 - lastConf.q2);
-        distance += MH.Min(MH.Abs(MH.ClampRadians(lastConf.a1) - MH.ClampRadians(solutionConf.a1)), MH.Abs(MH.TwoPi - MH.ClampRadians(lastConf.a1) + MH.ClampRadians(solutionConf.a1)));
-        distance += MH.Min(MH.Abs(MH.ClampRadians(lastConf.a2) - MH.ClampRadians(solutionConf.a2)), MH.Abs(MH.TwoPi - MH.ClampRadians(lastConf.a2) + MH.ClampRadians(solutionConf.a2)));
-        distance += MH.Min(MH.Abs(MH.ClampRadians(lastConf.a3) - MH.ClampRadians(solutionConf.a3)), MH.Abs(MH.TwoPi - MH.ClampRadians(lastConf.a3) + MH.ClampRadians(solutionConf.a3)));
-        distance += MH.Min(MH.Abs(MH.ClampRadians(lastConf.a4) - MH.ClampRadians(solutionConf.a4)), MH.Abs(MH.TwoPi - MH.ClampRadians(lastConf.a4) + MH.ClampRadians(solutionConf.a4)));
-        distance += MH.Min(MH.Abs(MH.ClampRadians(lastConf.a5) - MH.ClampRadians(solutionConf.a5)), MH.Abs(MH.TwoPi - MH.ClampRadians(lastConf.a5) + MH.ClampRadians(solutionConf.a5)));
+        distance += MH.Min(MH.Abs(MH.ClampRadians(lastConf.a1) - MH.ClampRadians(solutionConf.a1)), MH.Abs(MH.TwoPi - MH.Abs(MH.ClampRadians(lastConf.a1) - MH.ClampRadians(solutionConf.a1))));
+        distance += MH.Min(MH.Abs(MH.ClampRadians(lastConf.a2) - MH.ClampRadians(solutionConf.a2)), MH.Abs(MH.TwoPi - MH.Abs(MH.ClampRadians(lastConf.a2) - MH.ClampRadians(solutionConf.a2))));
+        distance += MH.Min(MH.Abs(MH.ClampRadians(lastConf.a3) - MH.ClampRadians(solutionConf.a3)), MH.Abs(MH.TwoPi - MH.Abs(MH.ClampRadians(lastConf.a3) - MH.ClampRadians(solutionConf.a3))));
+        distance += MH.Min(MH.Abs(MH.ClampRadians(lastConf.a4) - MH.ClampRadians(solutionConf.a4)), MH.Abs(MH.TwoPi - MH.Abs(MH.ClampRadians(lastConf.a4) - MH.ClampRadians(solutionConf.a4))));
+        distance += MH.Min(MH.Abs(MH.ClampRadians(lastConf.a5) - MH.ClampRadians(solutionConf.a5)), MH.Abs(MH.TwoPi - MH.Abs(MH.ClampRadians(lastConf.a5) - MH.ClampRadians(solutionConf.a5))));
         return distance;
     }
 }
