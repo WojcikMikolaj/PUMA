@@ -287,20 +287,25 @@ public class PUMA
     public void Render(Shader shader, Matrix4 projectionViewMatrix)
     {
         shader.LoadMatrix4("mvp", _f01 * projectionViewMatrix);
+        shader.LoadFloat3("color", new Vector3(1,0, 0));
         _l1.Render();
         shader.LoadMatrix4("mvp", _f02 * projectionViewMatrix);
+        shader.LoadFloat3("color", new Vector3(0,1, 0));
         _q2.Render();
         _q2Base.Render();
         _q2BaseInv.Render();
         shader.LoadMatrix4("mvp", _f03 * projectionViewMatrix);
+        shader.LoadFloat3("color", new Vector3(0,0, 1));
         _l3.Render();
         _l3Base.Render();
         _l3BaseInv.Render();
         shader.LoadMatrix4("mvp", _f04 * projectionViewMatrix);
+        shader.LoadFloat3("color", new Vector3(1,1, 0));
         _l4.Render();
         _l4Base.Render();
         _l4BaseInv.Render();
         shader.LoadMatrix4("mvp", _f05 * projectionViewMatrix);
+        shader.LoadFloat3("color", new Vector3(1,0, 1));
         _l5.Render();
     }
 
