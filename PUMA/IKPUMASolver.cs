@@ -107,7 +107,6 @@ public static class IKPUMASolver
             //Atan - 2 rozwiązania
             //Alpha1
             solutions[i].a1 = CalculateA1(settings, xy, py, xx, px, i < solutions.Count / 2);
-
             //Asin - 2 rozwiązania
             //Alpha4
             solutions[i].a4 = CalculateA4(xy, xx, solutions[i].a1,
@@ -140,6 +139,10 @@ public static class IKPUMASolver
         bool firstSolution)
     {
         var a1 = (float) MH.Atan((xy * settings.l4 - py) / (xx * settings.l4 - px));
+        if (a1 is Single.NaN)
+        {
+            a1 = 0;
+        }
         if (!firstSolution)
         {
             a1 += MH.Pi;
@@ -156,6 +159,10 @@ public static class IKPUMASolver
         var a2 = (float) MH.Atan(
             -(a1.c * a4.c * (pz - settings.l4 * xz - settings.l1) + settings.l3 * (xx + a1.s * a4.s)) /
             (a4.c * (px - settings.l4 * xx) - a1.c * settings.l3 * xz));
+        if (a2 is Single.NaN)
+        {
+            a2 = 0;
+        }
         if (!firstSolution)
         {
             a2 += MH.Pi;
