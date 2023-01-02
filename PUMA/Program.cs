@@ -266,6 +266,7 @@ public class Program : GameWindow
             if (ImGui.SliderInt("num", ref pumaSolutionNumber, 0, 7))
             {
                 _puma.SolutionNumber = pumaSolutionNumber;
+                _puma2.SolutionNumber = pumaSolutionNumber;
             }
 
             ImGui.Text(_puma.endPosition.ToString());
@@ -286,36 +287,42 @@ public class Program : GameWindow
             if (ImGui.SliderFloat("alpha1", ref alpha1, 0, 360))
             {
                 _puma.Alpha1 = alpha1;
+                _puma2.Alpha1 = alpha1;
             }
 
             float q2 = _puma.Q2;
             if (ImGui.SliderFloat("q2", ref q2, 1, 5))
             {
                 _puma.Q2 = q2;
+                _puma2.Q2 = q2;
             }
 
             float alpha2 = _puma.Alpha2;
             if (ImGui.SliderFloat("alpha2", ref alpha2, 0, 360))
             {
                 _puma.Alpha2 = alpha2;
+                _puma2.Alpha2 = alpha2;
             }
 
             float alpha3 = _puma.Alpha3;
             if (ImGui.SliderFloat("alpha3", ref alpha3, 0, 360))
             {
                 _puma.Alpha3 = alpha3;
+                _puma2.Alpha3 = alpha3;
             }
 
             float alpha4 = _puma.Alpha4;
             if (ImGui.SliderFloat("alpha4", ref alpha4, 0, 360))
             {
                 _puma.Alpha4 = alpha4;
+                _puma2.Alpha4 = alpha4;
             }
 
             float alpha5 = _puma.Alpha5;
             if (ImGui.SliderFloat("alpha5", ref alpha5, 0, 360))
             {
                 _puma.Alpha5 = alpha5;
+                _puma2.Alpha5 = alpha5;
             }
         }
 
@@ -328,22 +335,26 @@ public class Program : GameWindow
             if (ImGui.SliderFloat("l1", ref l1, 1, 5))
             {
                 _puma.L1 = l1;
+                _puma2.L1 = l1;
             }
 
             if (ImGui.SliderFloat("l3", ref l3, 1, 5))
             {
                 _puma.L3 = l3;
+                _puma2.L3 = l3;
             }
 
             if (ImGui.SliderFloat("l4", ref l4, 1, 5))
             {
                 _puma.L4 = l4;
+                _puma2.L4 = l4;
             }
 
             float r = _puma.R;
             if (ImGui.SliderFloat("promien", ref r, 0.1f, 1))
             {
                 _puma.R = r;
+                _puma2.R = r;
             }
         }
 
