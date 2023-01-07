@@ -67,6 +67,7 @@ public static class IKPUMASolver
     public static Solution[] SolveInverse(Vector3 targetPosition, Vector3 targetRotationInRad,
         PUMASettings settings, PUMAConfiguration lastConfiguration = null)
     {
+        START:
         Matrix4 f05 = Matrix4.CreateRotationX(targetRotationInRad.X) *
                       Matrix4.CreateRotationY(targetRotationInRad.Y) * Matrix4.CreateRotationZ(targetRotationInRad.Z) *
                       Matrix4.CreateTranslation(targetPosition);
@@ -106,7 +107,12 @@ public static class IKPUMASolver
         {
             //Atan - 2 rozwiązania
             //Alpha1
-            solutions[i].a1 = CalculateA1(settings, xy, py, xx, px, i < solutions.Count / 2);
+            (solutions[i].a1, bool wasNan) = CalculateA1(settings, xy, py, xx, px, i < solutions.Count / 2);
+            if (wasNan)
+            {
+                targetPosition.X += float.Epsilon;
+                goto START;
+            }
             //Asin - 2 rozwiązania
             //Alpha4
             solutions[i].a4 = CalculateA4(xy, xx, solutions[i].a1,
@@ -135,12 +141,14 @@ public static class IKPUMASolver
         return ((a4.c * (px - settings.l4 * xx) - a1.c * settings.l3 * xz) / (a1.c * a2.c * a4.c));
     }
 
-    private static AngleParam CalculateA1(PUMASettings settings, float xy, float py, float xx, float px,
+    private static (AngleParam, bool) CalculateA1(PUMASettings settings, float xy, float py, float xx, float px,
         bool firstSolution)
     {
         var a1 = (float) MH.Atan((xy * settings.l4 - py) / (xx * settings.l4 - px));
+        var wasNaN = false;
         if (a1 is Single.NaN)
         {
+            wasNaN = true;
             a1 = 0;
         }
         if (!firstSolution)
@@ -150,7 +158,7 @@ public static class IKPUMASolver
 
         var s1 = (float) MH.Sin(a1);
         var c1 = (float) MH.Cos(a1);
-        return new AngleParam(a1, s1, c1);
+        return (new AngleParam(a1, s1, c1),wasNaN);
     }
 
     private static AngleParam CalculateA2(PUMASettings settings, float pz, float xz, float xx, float px, AngleParam a1,
