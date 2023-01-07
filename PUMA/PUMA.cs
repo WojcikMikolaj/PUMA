@@ -21,12 +21,14 @@ public class PUMA
 
     private Vector3 startPos;
     private Vector3 startRotInRad;
+    private Quaternion startRot;
     private PUMAConfiguration startConf;
 
     private PUMAConfiguration currConf;
 
     private Vector3 endPos;
     private Vector3 endRotInRad;
+    private Quaternion endRot;
     private PUMAConfiguration endConf;
 
     private Vector3 lastPos;
@@ -412,6 +414,7 @@ public class PUMA
         lastRotInRad = startRotInRad = (MH.DegreesToRadians(startingPointerRot.X),
             MH.DegreesToRadians(startingPointerRot.Y),
             MH.DegreesToRadians(startingPointerRot.Z));
+        startRot = Quaternion.FromEulerAngles(startRotInRad);
 
         lastConf = startConf = IKPUMASolver.SolveInverse(startPos, startRotInRad,
             new PUMASettings(_l1.h, _l3.h, _l4.h))[0].ToConf();
@@ -423,6 +426,7 @@ public class PUMA
         endRotInRad = (MH.DegreesToRadians(endingPointerRot.X),
             MH.DegreesToRadians(endingPointerRot.Y),
             MH.DegreesToRadians(endingPointerRot.Z));
+        endRot = Quaternion.FromEulerAngles(endRotInRad);
 
         endConf = IKPUMASolver.SolveInverse(endPos, endRotInRad,
             new PUMASettings(_l1.h, _l3.h, _l4.h))[0].ToConf();
@@ -462,39 +466,40 @@ public class PUMA
         else
         {
             var currPos = (1.0f - t) * startPos + t * endPos;
-            var currRotInRad = (1.0f - t) * startRotInRad + t * endRotInRad;
+            var currRot = Quaternion.Slerp(startRot, endRot, t);
+            var currRotInRad = currRot.ToEulerAngles();
 
-            var radX = 0.0f;
-            if (MH.Abs(startRotInRad.X - endRotInRad.X) < MH.Pi)
-            {
-                radX = (1.0f - t) * startRotInRad.X + t * endRotInRad.X;
-            }
-            else
-            {
-                radX = (1.0f - t) * startRotInRad.X + t * -(MH.TwoPi - endRotInRad.X);
-            }
-
-            var radY = 0.0f;
-            if (MH.Abs(startRotInRad.Y - endRotInRad.Y) < MH.Pi)
-            {
-                radY = (1.0f - t) * startRotInRad.Y + t * endRotInRad.Y;
-            }
-            else
-            {
-                radY = (1.0f - t) * startRotInRad.Y + t * -(MH.TwoPi - endRotInRad.Y);
-            }
-
-            var radZ = 0.0f;
-            if (MH.Abs(startRotInRad.Z - endRotInRad.Z) < MH.Pi)
-            {
-                radZ = (1.0f - t) * startRotInRad.Z + t * endRotInRad.Z;
-            }
-            else
-            {
-                radZ = (1.0f - t) * startRotInRad.Z + t * -(MH.TwoPi - endRotInRad.Z);
-            }
-
-            currRotInRad = (radX, radY, radZ);
+            // var radX = 0.0f;
+            // if (MH.Abs(startRotInRad.X - endRotInRad.X) < MH.Pi)
+            // {
+            //     radX = (1.0f - t) * startRotInRad.X + t * endRotInRad.X;
+            // }
+            // else
+            // {
+            //     radX = (1.0f - t) * startRotInRad.X + t * -(MH.TwoPi - endRotInRad.X);
+            // }
+            //
+            // var radY = 0.0f;
+            // if (MH.Abs(startRotInRad.Y - endRotInRad.Y) < MH.Pi)
+            // {
+            //     radY = (1.0f - t) * startRotInRad.Y + t * endRotInRad.Y;
+            // }
+            // else
+            // {
+            //     radY = (1.0f - t) * startRotInRad.Y + t * -(MH.TwoPi - endRotInRad.Y);
+            // }
+            //
+            // var radZ = 0.0f;
+            // if (MH.Abs(startRotInRad.Z - endRotInRad.Z) < MH.Pi)
+            // {
+            //     radZ = (1.0f - t) * startRotInRad.Z + t * endRotInRad.Z;
+            // }
+            // else
+            // {
+            //     radZ = (1.0f - t) * startRotInRad.Z + t * -(MH.TwoPi - endRotInRad.Z);
+            // }
+            //
+            // currRotInRad = (radX, radY, radZ);
 
 
             var solutions = IKPUMASolver.SolveInverse(currPos, currRotInRad,
