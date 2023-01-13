@@ -18,6 +18,7 @@ public class PUMA
     private readonly Cylinder _l4Base;
     private readonly Cylinder _l4BaseInv;
     private readonly Cylinder _l5;
+    private readonly Pointer _nosePointer;
 
     private Vector3 startPos;
     private Vector3 startRotInRad;
@@ -88,7 +89,7 @@ public class PUMA
         _l5 = new Cylinder(Direction.X);
         _l5.r = 0.05f;
         _l5.h = 0.1f;
-
+        _nosePointer = new Pointer();
         RecalculateMatrices();
     }
 
@@ -286,29 +287,32 @@ public class PUMA
 
     Matrix4 _a5Matrix = Matrix4.Identity;
 
-    public void Render(Shader shader, Matrix4 projectionViewMatrix)
+    public void Render(Shader cylinderShader, Shader pointerShader, Matrix4 projectionViewMatrix)
     {
-        shader.LoadMatrix4("mvp", _f01 * projectionViewMatrix);
-        shader.LoadFloat3("color", new Vector3(1,0, 0));
+        cylinderShader.LoadMatrix4("mvp", _f01 * projectionViewMatrix);
+        cylinderShader.LoadFloat3("color", new Vector3(1,0, 0));
         _l1.Render();
-        shader.LoadMatrix4("mvp", _f02 * projectionViewMatrix);
-        shader.LoadFloat3("color", new Vector3(0,1, 0));
+        cylinderShader.LoadMatrix4("mvp", _f02 * projectionViewMatrix);
+        cylinderShader.LoadFloat3("color", new Vector3(0,1, 0));
         _q2.Render();
         _q2Base.Render();
         _q2BaseInv.Render();
-        shader.LoadMatrix4("mvp", _f03 * projectionViewMatrix);
-        shader.LoadFloat3("color", new Vector3(0,0, 1));
+        cylinderShader.LoadMatrix4("mvp", _f03 * projectionViewMatrix);
+        cylinderShader.LoadFloat3("color", new Vector3(0,0, 1));
         _l3.Render();
         _l3Base.Render();
         _l3BaseInv.Render();
-        shader.LoadMatrix4("mvp", _f04 * projectionViewMatrix);
-        shader.LoadFloat3("color", new Vector3(1,1, 0));
+        cylinderShader.LoadMatrix4("mvp", _f04 * projectionViewMatrix);
+        cylinderShader.LoadFloat3("color", new Vector3(1,1, 0));
         _l4.Render();
         _l4Base.Render();
         _l4BaseInv.Render();
-        shader.LoadMatrix4("mvp", _f05 * projectionViewMatrix);
-        shader.LoadFloat3("color", new Vector3(1,0, 1));
+        cylinderShader.LoadMatrix4("mvp", _f05 * projectionViewMatrix);
+        cylinderShader.LoadFloat3("color", new Vector3(1,0, 1));
         _l5.Render();
+        pointerShader.Use();
+        _nosePointer.Render(pointerShader, _f05 * projectionViewMatrix);
+        
     }
 
     private Solution[] _solutions;

@@ -215,6 +215,6 @@ public static class IKPUMASolver
         var a5 = (float) MH.Atan2(a1.s * zx - a1.c * zy, a1.c * yy - a1.s * yx);
         var s5 = (float) MH.Sin(a5);
         var c5 = (float) MH.Cos(a5);
-        return new AngleParam(s5, s5, c5);
+        return new AngleParam(a5, s5, c5);
     }
 }

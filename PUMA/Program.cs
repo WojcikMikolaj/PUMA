@@ -179,7 +179,7 @@ public class Program : GameWindow
             texture.Use();
             defaultShader.LoadInteger("sampler", 0);
             defaultShader.LoadMatrix4("mvp", camera.GetProjectionViewMatrix());
-            _puma.Render(defaultShader, camera.GetProjectionViewMatrix());
+            _puma.Render(defaultShader, pointerShader, camera.GetProjectionViewMatrix());
 
 
             pointerShader.Use();
@@ -195,7 +195,7 @@ public class Program : GameWindow
             texture.Use();
             defaultShader.LoadInteger("sampler", 0);
             defaultShader.LoadMatrix4("mvp", camera.GetProjectionViewMatrix());
-            _puma2.Render(defaultShader, camera.GetProjectionViewMatrix());
+            _puma2.Render(defaultShader, pointerShader, camera.GetProjectionViewMatrix());
             
             pointerShader.Use();
             _startingPointer.Render(pointerShader, camera.GetProjectionViewMatrix());
