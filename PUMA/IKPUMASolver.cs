@@ -149,6 +149,7 @@ public static class IKPUMASolver
         if (a1 is Single.NaN)
         {
             wasNaN = true;
+            //nie powinno byc pi/2?
             a1 = 0;
         }
         if (!firstSolution)
