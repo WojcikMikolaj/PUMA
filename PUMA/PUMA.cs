@@ -436,6 +436,25 @@ public class PUMA
             new PUMASettings(_l1.h, _l3.h, _l4.h))[0].ToConf();
     }
 
+    private float InterpolateRadsShortest(float start, float end, float t)
+    {
+        if (Math.Abs(start - end) < Single.Pi)
+        {
+            return (1.0f - t) * start + t * end;
+        }
+        else
+        {
+            if (end < start)
+            {
+                return (1.0f - t) * start + t * (end + MH.TwoPi);    
+            }
+            else
+            {
+                return (1.0f - t) * start + t * (end - MH.TwoPi);
+            }
+        }
+    }
+    
     public void CalculateCurrentConfiguration([Range(0, 1)] float t)
     {
         if (t < 0)
@@ -452,12 +471,19 @@ public class PUMA
         if (InterpolateConf)
         {
             //TODO po najkrótszej
-            var a1 = (1.0f - t) * startConf.a1 + t * endConf.a1;
+            // var a1 = (1.0f - t) * startConf.a1 + t * endConf.a1;
+            // var q2 = (1.0f - t) * startConf.q2 + t * endConf.q2;
+            // var a2 = (1.0f - t) * startConf.a2 + t * endConf.a2;
+            // var a3 = (1.0f - t) * startConf.a3 + t * endConf.a3;
+            // var a4 = (1.0f - t) * startConf.a4 + t * endConf.a4;
+            // var a5 = (1.0f - t) * startConf.a5 + t * endConf.a5;
+            
+            var a1 = InterpolateRadsShortest(startConf.a1, endConf.a1, t);
             var q2 = (1.0f - t) * startConf.q2 + t * endConf.q2;
-            var a2 = (1.0f - t) * startConf.a2 + t * endConf.a2;
-            var a3 = (1.0f - t) * startConf.a3 + t * endConf.a3;
-            var a4 = (1.0f - t) * startConf.a4 + t * endConf.a4;
-            var a5 = (1.0f - t) * startConf.a5 + t * endConf.a5;
+            var a2 = InterpolateRadsShortest(startConf.a2, endConf.a2, t);
+            var a3 = InterpolateRadsShortest(startConf.a3, endConf.a3, t);
+            var a4 = InterpolateRadsShortest(startConf.a4, endConf.a4, t);
+            var a5 = InterpolateRadsShortest(startConf.a5, endConf.a5, t);
 
             currConf = new PUMAConfiguration(a1, q2, a2, a3, a4, a5);
             _alpha1 = MH.RadiansToDegrees(a1);
