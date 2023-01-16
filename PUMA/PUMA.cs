@@ -451,6 +451,7 @@ public class PUMA
 
         if (InterpolateConf)
         {
+            //TODO po najkrótszej
             var a1 = (1.0f - t) * startConf.a1 + t * endConf.a1;
             var q2 = (1.0f - t) * startConf.q2 + t * endConf.q2;
             var a2 = (1.0f - t) * startConf.a2 + t * endConf.a2;
