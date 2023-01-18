@@ -101,12 +101,12 @@ public class Program : GameWindow
         _startingPointer.Pos = (6, 0, 0);
         
         _puma.MoveToPoint(_startingPointer.Pos, _startingPointer.Rot);
-        _puma.SetStartPoint(_startingPointer.Pos, _startingPointer.Rot);
         _puma.SetEndPoint(_endingPointer.Pos, _endingPointer.Rot);
-        
+        _puma.SetStartPoint(_startingPointer.Pos, _startingPointer.Rot);
+
         _puma2.MoveToPoint(_startingPointer.Pos, _startingPointer.Rot);
-        _puma2.SetStartPoint(_startingPointer.Pos, _startingPointer.Rot);
         _puma2.SetEndPoint(_endingPointer.Pos, _endingPointer.Rot);
+        _puma2.SetStartPoint(_startingPointer.Pos, _startingPointer.Rot);
 
         //camera.Move(0,-10,0);
     }
@@ -262,12 +262,12 @@ public class Program : GameWindow
                 _puma2.SetEndPoint(_endingPointer.Pos, _endingPointer.Rot);
             }
 
-            var pumaSolutionNumber = _puma.SolutionNumber;
-            if (ImGui.SliderInt("num", ref pumaSolutionNumber, 0, 7))
-            {
-                _puma.SolutionNumber = pumaSolutionNumber;
-                _puma2.SolutionNumber = pumaSolutionNumber;
-            }
+            // var pumaSolutionNumber = _puma.SolutionNumber;
+            // if (ImGui.SliderInt("num", ref pumaSolutionNumber, 0, 7))
+            // {
+            //     _puma.SolutionNumber = pumaSolutionNumber;
+            //     _puma2.SolutionNumber = pumaSolutionNumber;
+            // }
 
             ImGui.Text(_puma.endPosition.ToString());
 

@@ -422,6 +422,8 @@ public class PUMA
 
         lastConf = startConf = IKPUMASolver.SolveInverse(startPos, startRotInRad,
             new PUMASettings(_l1.h, _l3.h, _l4.h))[0].ToConf();
+        
+        CalculateCurrentConfiguration(0.000000001f);
     }
 
     public void SetEndPoint(Vector3 endingPointerPos, Vector3 endingPointerRot)
@@ -469,22 +471,15 @@ public class PUMA
             return;
         }
 
-        if (t > 1)
+        if (t >= 1)
         {
-            t = 1;
+            t = 0.99999f;
         }
 
 
         if (InterpolateConf)
         {
-            // //TODO po najkrótszej
-            // var a1 = (1.0f - t) * startConf.a1 + t * endConf.a1;
-            // var q2 = (1.0f - t) * startConf.q2 + t * endConf.q2;
-            // var a2 = (1.0f - t) * startConf.a2 + t * endConf.a2;
-            // var a3 = (1.0f - t) * startConf.a3 + t * endConf.a3;
-            // var a4 = (1.0f - t) * startConf.a4 + t * endConf.a4;
-            // var a5 = (1.0f - t) * startConf.a5 + t * endConf.a5;
-            
+
             var a1 = InterpolateRadsShortest(startConf.a1, endConf.a1, t);
             var q2 = (1.0f - t) * startConf.q2 + t * endConf.q2;
             var a2 = InterpolateRadsShortest(startConf.a2, endConf.a2, t);
@@ -506,40 +501,7 @@ public class PUMA
             var currPos = (1.0f - t) * startPos + t * endPos;
             var currRot = Quaternion.Slerp(startRot, endRot, t);
             var currRotInRad = currRot.ToEulerAngles();
-
-            // var radX = 0.0f;
-            // if (MH.Abs(startRotInRad.X - endRotInRad.X) < MH.Pi)
-            // {
-            //     radX = (1.0f - t) * startRotInRad.X + t * endRotInRad.X;
-            // }
-            // else
-            // {
-            //     radX = (1.0f - t) * startRotInRad.X + t * -(MH.TwoPi - endRotInRad.X);
-            // }
-            //
-            // var radY = 0.0f;
-            // if (MH.Abs(startRotInRad.Y - endRotInRad.Y) < MH.Pi)
-            // {
-            //     radY = (1.0f - t) * startRotInRad.Y + t * endRotInRad.Y;
-            // }
-            // else
-            // {
-            //     radY = (1.0f - t) * startRotInRad.Y + t * -(MH.TwoPi - endRotInRad.Y);
-            // }
-            //
-            // var radZ = 0.0f;
-            // if (MH.Abs(startRotInRad.Z - endRotInRad.Z) < MH.Pi)
-            // {
-            //     radZ = (1.0f - t) * startRotInRad.Z + t * endRotInRad.Z;
-            // }
-            // else
-            // {
-            //     radZ = (1.0f - t) * startRotInRad.Z + t * -(MH.TwoPi - endRotInRad.Z);
-            // }
-            //
-            // currRotInRad = (radX, radY, radZ);
-
-
+            
             var solutions = IKPUMASolver.SolveInverse(currPos, currRotInRad,
                 new PUMASettings(_l1.h, _l3.h, _l4.h));
 
@@ -596,16 +558,16 @@ public class PUMA
 
         double distance = 0.0f;
         distance = MH.Abs((MH.Abs(solutionConf.q2) - MH.Abs(lastConf.q2))/(MH.Abs(solutionConf.q2) + MH.Abs(lastConf.q2)));
-        distance += MH.Min(MH.Abs(MH.ClampRadians(lastConf.a1) - MH.ClampRadians(solutionConf.a1)),
-            MH.Abs(MH.TwoPi - MH.Abs(MH.ClampRadians(lastConf.a1) - MH.ClampRadians(solutionConf.a1))));
-        distance += MH.Min(MH.Abs(MH.ClampRadians(lastConf.a2) - MH.ClampRadians(solutionConf.a2)),
-            MH.Abs(MH.TwoPi - MH.Abs(MH.ClampRadians(lastConf.a2) - MH.ClampRadians(solutionConf.a2))));
-        distance += MH.Min(MH.Abs(MH.ClampRadians(lastConf.a3) - MH.ClampRadians(solutionConf.a3)),
-            MH.Abs(MH.TwoPi - MH.Abs(MH.ClampRadians(lastConf.a3) - MH.ClampRadians(solutionConf.a3))));
-        distance += MH.Min(MH.Abs(MH.ClampRadians(lastConf.a4) - MH.ClampRadians(solutionConf.a4)),
-            MH.Abs(MH.TwoPi - MH.Abs(MH.ClampRadians(lastConf.a4) - MH.ClampRadians(solutionConf.a4))));
-        distance += MH.Min(MH.Abs(MH.ClampRadians(lastConf.a5) - MH.ClampRadians(solutionConf.a5)),
-            MH.Abs(MH.TwoPi - MH.Abs(MH.ClampRadians(lastConf.a5) - MH.ClampRadians(solutionConf.a5))));
+        distance += MH.Min(MH.Abs(MH.NormalizeRadians(lastConf.a1) - MH.NormalizeRadians(solutionConf.a1)),
+            MH.Abs(MH.TwoPi - MH.Abs(MH.NormalizeRadians(lastConf.a1) - MH.NormalizeRadians(solutionConf.a1))));
+        distance += MH.Min(MH.Abs(MH.NormalizeRadians(lastConf.a2) - MH.NormalizeRadians(solutionConf.a2)),
+            MH.Abs(MH.TwoPi - MH.Abs(MH.NormalizeRadians(lastConf.a2) - MH.NormalizeRadians(solutionConf.a2))));
+        distance += MH.Min(MH.Abs(MH.NormalizeRadians(lastConf.a3) - MH.NormalizeRadians(solutionConf.a3)),
+            MH.Abs(MH.TwoPi - MH.Abs(MH.NormalizeRadians(lastConf.a3) - MH.NormalizeRadians(solutionConf.a3))));
+        distance += MH.Min(MH.Abs(MH.NormalizeRadians(lastConf.a4) - MH.NormalizeRadians(solutionConf.a4)),
+            MH.Abs(MH.TwoPi - MH.Abs(MH.NormalizeRadians(lastConf.a4) - MH.NormalizeRadians(solutionConf.a4))));
+        distance += MH.Min(MH.Abs(MH.NormalizeRadians(lastConf.a5) - MH.NormalizeRadians(solutionConf.a5)),
+            MH.Abs(MH.TwoPi - MH.Abs(MH.NormalizeRadians(lastConf.a5) - MH.NormalizeRadians(solutionConf.a5))));
         return (float)distance;
     }
 }
