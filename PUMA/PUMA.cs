@@ -438,19 +438,21 @@ public class PUMA
 
     private double InterpolateRadsShortest(double start, double end, double t)
     {
-        start = MH.NormalizeRadians(start);
-        end = MH.NormalizeRadians(end);
-        var diff = end - start;
-        if (diff > Double.Pi)
+        if (Math.Abs(start - end) < Single.Pi)
         {
-            diff = diff - MH.TwoPi;
+            return (1.0 - t) * start + t * end;
         }
-        if(diff < -Double.Pi)
+        else
         {
-            diff = diff + MH.TwoPi;
+            if (end < start)
+            {
+                return (1.0 - t) * start + t * (end + MH.TwoPi);    
+            }
+            else
+            {
+                return (1.0 - t) * start + t * (end - MH.TwoPi);
+            }
         }
-
-        return start + t * diff;
     }
     
     public void CalculateCurrentConfiguration([Range(0, 1)] float t)
