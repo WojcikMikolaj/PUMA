@@ -333,12 +333,12 @@ public class PUMA
             if (!newConf.IsNaNOrInf())
             {
                 var newConfInDeg = newConf.InDegrees();
-                _alpha1 = newConfInDeg.a1;
-                _q2.h = newConfInDeg.q2;
-                _alpha2 = newConfInDeg.a2;
-                _alpha3 = newConfInDeg.a3;
-                _alpha4 = newConfInDeg.a4;
-                _alpha5 = newConfInDeg.a5;
+                _alpha1 = (float)newConfInDeg.a1;
+                _q2.h = (float)newConfInDeg.q2;
+                _alpha2 = (float)newConfInDeg.a2;
+                _alpha3 = (float)newConfInDeg.a3;
+                _alpha4 = (float)newConfInDeg.a4;
+                _alpha5 = (float)newConfInDeg.a5;
                 RecalculateMatrices();
             }
         }
@@ -375,12 +375,12 @@ public class PUMA
         if (!newConf.IsNaNOrInf() && Math.Abs(distance - float.MaxValue) > 0.1)
         {
             var newConfInDeg = newConf.InDegrees();
-            _alpha1 = newConfInDeg.a1;
-            _q2.h = newConfInDeg.q2;
-            _alpha2 = newConfInDeg.a2;
-            _alpha3 = newConfInDeg.a3;
-            _alpha4 = newConfInDeg.a4;
-            _alpha5 = newConfInDeg.a5;
+            _alpha1 = (float)newConfInDeg.a1;
+            _q2.h = (float)newConfInDeg.q2;
+            _alpha2 = (float)newConfInDeg.a2;
+            _alpha3 = (float)newConfInDeg.a3;
+            _alpha4 = (float)newConfInDeg.a4;
+            _alpha5 = (float)newConfInDeg.a5;
             RecalculateMatrices();
             return true;
         }
@@ -391,15 +391,15 @@ public class PUMA
     private float CalculateDistance(Vector3 targetPos, Solution solution)
     {
         var l1Matrix = Matrix4.CreateTranslation(0, 0, _l1.h);
-        var q2Matrix = Matrix4.CreateTranslation(solution.q2, 0, 0);
+        var q2Matrix = Matrix4.CreateTranslation((float)solution.q2, 0, 0);
         var l3Matrix = Matrix4.CreateTranslation(0, 0, -_l3.h);
         var l4Matrix = Matrix4.CreateTranslation(_l4.h, 0, 0);
 
-        var a1Matrix = Matrix4.CreateRotationZ(solution.a1.a);
-        var a2Matrix = Matrix4.CreateRotationY(solution.a2.a);
-        var a3Matrix = Matrix4.CreateRotationY(solution.a3.a);
-        var a4Matrix = Matrix4.CreateRotationZ(solution.a4.a);
-        var a5Matrix = Matrix4.CreateRotationX(solution.a5.a);
+        var a1Matrix = Matrix4.CreateRotationZ((float)solution.a1.a);
+        var a2Matrix = Matrix4.CreateRotationY((float)solution.a2.a);
+        var a3Matrix = Matrix4.CreateRotationY((float)solution.a3.a);
+        var a4Matrix = Matrix4.CreateRotationZ((float)solution.a4.a);
+        var a5Matrix = Matrix4.CreateRotationX((float)solution.a5.a);
 
         var f01 = a1Matrix;
         var f02 = a2Matrix * l1Matrix * f01;
@@ -436,30 +436,37 @@ public class PUMA
             new PUMASettings(_l1.h, _l3.h, _l4.h))[0].ToConf();
     }
 
-    private float InterpolateRadsShortest(float start, float end, float t)
+    private double InterpolateRadsShortest(double start, double end, double t)
     {
-        if (Math.Abs(start - end) < Single.Pi)
+        start = MH.NormalizeRadians(start);
+        end = MH.NormalizeRadians(end);
+        var diff = end - start;
+        if (diff > Double.Pi)
         {
-            return (1.0f - t) * start + t * end;
+            diff = diff - MH.TwoPi;
         }
-        else
+        if(diff < -Double.Pi)
         {
-            if (end < start)
-            {
-                return (1.0f - t) * start + t * (end + MH.TwoPi);    
-            }
-            else
-            {
-                return (1.0f - t) * start + t * (end - MH.TwoPi);
-            }
+            diff = diff + MH.TwoPi;
         }
+
+        return start + t * diff;
     }
     
     public void CalculateCurrentConfiguration([Range(0, 1)] float t)
     {
-        if (t < 0)
+        if (t <= 0)
         {
             t = 0;
+            currConf = startConf;
+            _alpha1 = (float)MH.RadiansToDegrees(startConf.a1);
+            _alpha2 = (float)MH.RadiansToDegrees(startConf.a2);
+            _alpha3 = (float)MH.RadiansToDegrees(startConf.a3);
+            _alpha4 = (float)MH.RadiansToDegrees(startConf.a4);
+            _alpha5 = (float)MH.RadiansToDegrees(startConf.a5);
+            _q2.h = (float)startConf.q2;
+            RecalculateMatrices();
+            return;
         }
 
         if (t > 1)
@@ -470,7 +477,7 @@ public class PUMA
 
         if (InterpolateConf)
         {
-            //TODO po najkrótszej
+            // //TODO po najkrótszej
             // var a1 = (1.0f - t) * startConf.a1 + t * endConf.a1;
             // var q2 = (1.0f - t) * startConf.q2 + t * endConf.q2;
             // var a2 = (1.0f - t) * startConf.a2 + t * endConf.a2;
@@ -484,14 +491,14 @@ public class PUMA
             var a3 = InterpolateRadsShortest(startConf.a3, endConf.a3, t);
             var a4 = InterpolateRadsShortest(startConf.a4, endConf.a4, t);
             var a5 = InterpolateRadsShortest(startConf.a5, endConf.a5, t);
-
+            
             currConf = new PUMAConfiguration(a1, q2, a2, a3, a4, a5);
-            _alpha1 = MH.RadiansToDegrees(a1);
-            _alpha2 = MH.RadiansToDegrees(a2);
-            _alpha3 = MH.RadiansToDegrees(a3);
-            _alpha4 = MH.RadiansToDegrees(a4);
-            _alpha5 = MH.RadiansToDegrees(a5);
-            _q2.h = q2;
+            _alpha1 = (float)MH.RadiansToDegrees(a1);
+            _alpha2 = (float)MH.RadiansToDegrees(a2);
+            _alpha3 = (float)MH.RadiansToDegrees(a3);
+            _alpha4 = (float)MH.RadiansToDegrees(a4);
+            _alpha5 = (float)MH.RadiansToDegrees(a5);
+            _q2.h = (float)q2;
             RecalculateMatrices();
         }
         else
@@ -561,12 +568,12 @@ public class PUMA
             if (!newConf.IsNaNOrInf() && distance != float.MaxValue)
             {
                 var newConfInDeg = newConf.InDegrees();
-                _alpha1 = newConfInDeg.a1;
-                _q2.h = newConfInDeg.q2;
-                _alpha2 = newConfInDeg.a2;
-                _alpha3 = newConfInDeg.a3;
-                _alpha4 = newConfInDeg.a4;
-                _alpha5 = newConfInDeg.a5;
+                _alpha1 = (float)newConfInDeg.a1;
+                _q2.h = (float)newConfInDeg.q2;
+                _alpha2 = (float)newConfInDeg.a2;
+                _alpha3 = (float)newConfInDeg.a3;
+                _alpha4 = (float)newConfInDeg.a4;
+                _alpha5 = (float)newConfInDeg.a5;
                 RecalculateMatrices();
                 lastPos = currPos;
                 lastRotInRad = currRotInRad;
@@ -587,7 +594,7 @@ public class PUMA
             solution.a5.a);
 
 
-        float distance = 0.0f;
+        double distance = 0.0f;
         distance = MH.Abs((MH.Abs(solutionConf.q2) - MH.Abs(lastConf.q2))/(MH.Abs(solutionConf.q2) + MH.Abs(lastConf.q2)));
         distance += MH.Min(MH.Abs(MH.ClampRadians(lastConf.a1) - MH.ClampRadians(solutionConf.a1)),
             MH.Abs(MH.TwoPi - MH.Abs(MH.ClampRadians(lastConf.a1) - MH.ClampRadians(solutionConf.a1))));
@@ -599,6 +606,6 @@ public class PUMA
             MH.Abs(MH.TwoPi - MH.Abs(MH.ClampRadians(lastConf.a4) - MH.ClampRadians(solutionConf.a4))));
         distance += MH.Min(MH.Abs(MH.ClampRadians(lastConf.a5) - MH.ClampRadians(solutionConf.a5)),
             MH.Abs(MH.TwoPi - MH.Abs(MH.ClampRadians(lastConf.a5) - MH.ClampRadians(solutionConf.a5))));
-        return distance;
+        return (float)distance;
     }
 }
