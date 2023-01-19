@@ -283,47 +283,95 @@ public class Program : GameWindow
 
         if (ImGui.CollapsingHeader("Parametry"))
         {
-            float alpha1 = _puma.Alpha1;
-            if (ImGui.SliderFloat("alpha1", ref alpha1, 0, 360))
+            ImGui.CollapsingHeader("Lewo");
+            ImGui.BeginDisabled();
+            float alpha1_l = _puma.Alpha1;
+            if (ImGui.SliderFloat("alpha1_l", ref alpha1_l, 0, 360))
             {
-                _puma.Alpha1 = alpha1;
-                _puma2.Alpha1 = alpha1;
+                _puma.Alpha1 = alpha1_l;
+                _puma2.Alpha1 = alpha1_l;
             }
 
-            float q2 = _puma.Q2;
-            if (ImGui.SliderFloat("q2", ref q2, 1, 5))
+            float q2_l = _puma.Q2;
+            if (ImGui.SliderFloat("q2_l", ref q2_l, 1, 5))
             {
-                _puma.Q2 = q2;
-                _puma2.Q2 = q2;
+                _puma.Q2 = q2_l;
+                _puma2.Q2 = q2_l;
             }
 
-            float alpha2 = _puma.Alpha2;
-            if (ImGui.SliderFloat("alpha2", ref alpha2, 0, 360))
+            float alpha2_l = _puma.Alpha2;
+            if (ImGui.SliderFloat("alpha2_l", ref alpha2_l, 0, 360))
             {
-                _puma.Alpha2 = alpha2;
-                _puma2.Alpha2 = alpha2;
+                _puma.Alpha2 = alpha2_l;
+                _puma2.Alpha2 = alpha2_l;
             }
 
-            float alpha3 = _puma.Alpha3;
-            if (ImGui.SliderFloat("alpha3", ref alpha3, 0, 360))
+            float alpha3_l = _puma.Alpha3;
+            if (ImGui.SliderFloat("alpha3_l", ref alpha3_l, 0, 360))
             {
-                _puma.Alpha3 = alpha3;
-                _puma2.Alpha3 = alpha3;
+                _puma.Alpha3 = alpha3_l;
+                _puma2.Alpha3 = alpha3_l;
             }
 
-            float alpha4 = _puma.Alpha4;
-            if (ImGui.SliderFloat("alpha4", ref alpha4, 0, 360))
+            float alpha4_l = _puma.Alpha4;
+            if (ImGui.SliderFloat("alpha4_l", ref alpha4_l, 0, 360))
             {
-                _puma.Alpha4 = alpha4;
-                _puma2.Alpha4 = alpha4;
+                _puma.Alpha4 = alpha4_l;
+                _puma2.Alpha4 = alpha4_l;
             }
 
-            float alpha5 = _puma.Alpha5;
-            if (ImGui.SliderFloat("alpha5", ref alpha5, 0, 360))
+            float alpha5_l = _puma.Alpha5;
+            if (ImGui.SliderFloat("alpha5_l", ref alpha5_l, 0, 360))
             {
-                _puma.Alpha5 = alpha5;
-                _puma2.Alpha5 = alpha5;
+                _puma.Alpha5 = alpha5_l;
+                _puma2.Alpha5 = alpha5_l;
             }
+            ImGui.EndDisabled();
+            
+            ImGui.CollapsingHeader("Prawo");
+            ImGui.BeginDisabled();
+            float alpha1_p = _puma2.Alpha1;
+            if (ImGui.SliderFloat("alpha1_p", ref alpha1_p, 0, 360))
+            {
+                _puma.Alpha1 = alpha1_p;
+                _puma2.Alpha1 = alpha1_p;
+            }
+
+            float q2_p = _puma2.Q2;
+            if (ImGui.SliderFloat("q2_p", ref q2_p, 1, 5))
+            {
+                _puma.Q2 = q2_p;
+                _puma2.Q2 = q2_p;
+            }
+
+            float alpha2_p = _puma2.Alpha2;
+            if (ImGui.SliderFloat("alpha2_p", ref alpha2_p, 0, 360))
+            {
+                _puma.Alpha2 = alpha2_p;
+                _puma2.Alpha2 = alpha2_p;
+            }
+
+            float alpha3_p = _puma2.Alpha3;
+            if (ImGui.SliderFloat("alpha3_p", ref alpha3_p, 0, 360))
+            {
+                _puma.Alpha3 = alpha3_p;
+                _puma2.Alpha3 = alpha3_p;
+            }
+
+            float alpha4_p = _puma2.Alpha4;
+            if (ImGui.SliderFloat("alpha4_p", ref alpha4_p, 0, 360))
+            {
+                _puma.Alpha4 = alpha4_p;
+                _puma2.Alpha4 = alpha4_p;
+            }
+
+            float alpha5_p = _puma2.Alpha5;
+            if (ImGui.SliderFloat("alpha5_p", ref alpha5_p, 0, 360))
+            {
+                _puma.Alpha5 = alpha5_p;
+                _puma2.Alpha5 = alpha5_p;
+            }
+            ImGui.EndDisabled();
         }
 
         if (ImGui.CollapsingHeader("Ustawienia"))
